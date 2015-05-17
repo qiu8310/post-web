@@ -1,0 +1,36 @@
+@mixin border-top-radius($radius) {
+  border-top-right-radius: $radius;
+  border-top-left-radius: $radius;
+}
+@mixin border-right-radius($radius) {
+  border-bottom-right-radius: $radius;
+  border-top-right-radius: $radius;
+}
+@mixin border-bottom-radius($radius) {
+  border-bottom-right-radius: $radius;
+  border-bottom-left-radius: $radius;
+}
+@mixin border-left-radius($radius) {
+  border-bottom-left-radius: $radius;
+  border-top-left-radius: $radius;
+}
+
+
+// Optional hyphenation
+@mixin hyphens($mode: auto) {
+  word-wrap: break-word;
+  -webkit-hyphens: $mode;
+  -moz-hyphens: $mode;
+  -ms-hyphens: $mode; // IE10+lor
+  -o-hyphens: $mode;
+  hyphens: $mode;
+}
+
+// Placeholder text color
+@mixin placeholder($color: $input-color-placeholder) {
+  &:-moz-placeholder            { color: $color; @content; } // Firefox 4-18
+  &::-moz-placeholder           { color: $color; @content;  // Firefox 19+
+    opacity: 1; } // See https://github.com/twbs/bootstrap/pull/11526
+  &:-ms-input-placeholder       { color: $color; @content;} // Internet Explorer 10+
+  &::-webkit-input-placeholder  { color: $color; @content;} // Safari and Chrome
+}

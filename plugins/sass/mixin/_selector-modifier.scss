@@ -1,0 +1,198 @@
+/*
+selector-modifier($index $modifier $selector, ...)
+
+root-modifier($selector)
+
+parent-modifier($selector)
+
+
+$modifier: replace prepend prefix suffix delete append
+
+
+@example:
+
+a {
+  @include selector-modifier(1 prepand '.en') {
+    color: red;
+  }
+}
+
+=> .en a { color: red; }
+
+*/
+
+$selector-modifier-default-place: suffix !default;
+
+
+// normalize every modifier format to list (index place status)
+@function normalize-modifiers($modifiers, $selector) {
+  $result: ();
+  $places: (prepend, prefix, suffix, append, delete, replace);
+
+  @each $modifier in $modifiers {
+    $new-modifier: ();
+    $len: length($modifier);
+
+    @if $len < 2 or $len > 3 {
+      @error "$modifier should be a list with length 2 or 3 and format: index [place] status";
+    }
+
+    // 保证 $index 为正数
+    $index: nth($modifier, 1);
+    @if type-of($index) != number {
+      @error "$modifier first argument must be number";
+    }
+    @if $index < 0 {
+      $index: $index + length($selector) + 1;
+    }
+
+    // make sure $place and $status exist，and unquote them
+    $place: unquote(if($len == 2, $selector-modifier-default-place, nth($modifier, 2)));
+    $status: unquote(if($len == 2, nth($modifier, 2), nth($modifier, 3)));
+
+    @if not index($places, $place) {
+      @error "$modifier $place argument must be one of (#{$places})";
+    }
+
+    $result: append($result, ($index $place $status), comma);
+
+  }
+
+  @return $result;
+
+}
+
+@function get-modifiers-by-index-status($modifiers, $index, $status: false) {
+  $result: ();
+  @each $modifier in $modifiers {
+    @if nth($modifier, 1) == $index {
+      @if not $status or nth($modifier, 2) == $status {
+        $result: append($result, $modifier);
+      }
+    }
+  }
+  @return $result;
+}
+
+@mixin selector-modifier($modifiers...) {
+  $selectors: &;
+  $new-selectors: ();
+
+  @each $selector in $selectors {
+    $modifiers: normalize-modifiers($modifiers, $selector);
+    $new-selector: ();
+
+    // update one $selector at a time
+    @for $i from 1 through length($selector) {
+
+      $item: nth($selector, $i);
+
+      // replace
+      @each $modifier in get-modifiers-by-index-status($modifiers, $i, replace) {
+        $item: nth($modifier, 3);
+      }
+
+      // prepend
+      @each $modifier in get-modifiers-by-index-status($modifiers, $i, prepend) {
+        $new-selector: append($new-selector, nth($modifier, 3));
+      }
+
+      // prefix
+      @each $modifier in get-modifiers-by-index-status($modifiers, $i, prefix) {
+        $item: nth($modifier, 3) + $item;
+      }
+
+      // suffix
+      @each $modifier in get-modifiers-by-index-status($modifiers, $i, suffix) {
+        $item: $item + nth($modifier, 3);
+      }
+
+      // not delete
+      @if length(get-modifiers-by-index-status($modifiers, $i, delete)) == 0 {
+        $new-selector: append($new-selector, $item);
+      }
+
+      // append
+      @each $modifier in get-modifiers-by-index-status($modifiers, $i, append) {
+        $new-selector: append($new-selector, nth($modifier, 3));
+      }
+    }
+
+
+    $new-selectors: append($new-selectors, $new-selector, comma);
+  }
+
+  @at-root #{$new-selectors} {
+    @content;
+  }
+
+}
+
+
+@mixin parent-modifier($selector) {
+  @include selector-modifier(-1 prepend $selector) {
+    @content;
+  }
+}
+
+@mixin root-modifier($selector) {
+  @include selector-modifier(1 prepend $selector) {
+    @content;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+//=== 下面两函数暂时没用到
+
+// 交换列表中 index 为 $i 和 $j 的两项
+@function list-items-switch($list, $i, $j) {
+  $len: length($list);
+  @if $len == 0 {
+    @return $list;
+  }
+  @if type-of($i) != number or $i < 1 or $i > $len or type-of($j) != number or $j < 1 or $j > $len {
+    @error "Index out of range";
+  }
+
+  $result: ();
+  @for $index from 1 through $len {
+    @if $i == $index {
+      $result: append($result, nth($list, $j));
+    } @else if $j == $index {
+      $result: append($result, nth($list, $i));
+    } @else {
+      $result: append($result, nth($list, $index));
+    }
+  }
+
+  @return $result;
+}
+
+
+// 对 modifiers 进行按 index 的冒泡排序（不必考虑性能， selector 不会有多少个）
+@function sort-modifiers($modifiers) {
+
+  @for $i from 1 through length($modifiers) {
+
+    $min-modifier: nth($modifiers, $i);
+    @for $j from $i through length($modifiers) {
+      $current-modifier: nth($modifiers, $j);
+
+      @if nth($current-modifier, 1) < nth($min-modifier, 1) {
+        $modifiers: list-items-switch($modifiers, $i, $j);
+      }
+    }
+  }
+
+  @return $modifiers;
+
+}

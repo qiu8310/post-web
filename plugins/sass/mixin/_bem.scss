@@ -1,0 +1,137 @@
+/*
+
+.block {}
+.block__element {}
+.block--modifier {}
+
+.person {}
+.person__hand {}
+.person--female {}
+.person--female__hand {}
+.person__hand--left {}
+
+=========================================
+example:
+
+@include B(block) {
+  color: #000;
+
+  @include M(red) {
+    color: red;
+
+    @include E(header) {
+      position: absolute;
+      top: 0;
+    }
+
+    @include BE(header) {
+      margin: 0;
+
+      @include BE(back) {
+        padding: 0;
+      }
+    }
+  }
+}
+
+=> compile to:
+
+.block {
+  color: #000;
+}
+.block--red {
+  color: red;
+}
+.block--red__header {
+  position: absolute;
+  top: 0;
+}
+.block--red .block__header {
+  margin: 0;
+}
+.block--red .block__header .block__back {
+  padding: 0;
+}
+
+
+*/
+
+
+@function bem-selector-block($selector) {
+  $selector: inspect($selector); //cast to string
+  $selector: str-slice($selector, 2, -2); //remove brackets
+
+  $element-index: str-index($selector, $element-separator);
+  $modifier-index: str-index($selector, $modifier-separator);
+
+  $index: false;
+
+  @if $element-index and $modifier-index {
+    $index: min($element-index, $modifier-index);
+  } @else if $element-index {
+    $index: $element-index;
+  } @else if $modifier-index {
+    $index: $modifier-index;
+  }
+
+  @return if($index, str-slice($selector, 1, $index - 1), $selector);
+}
+
+@function bem-group-append($items, $separator) {
+  $append: '';
+  @each $item in $items {
+    $append: $append + $separator + $item;
+  }
+  @return unquote($append);
+}
+
+@mixin B($block) {
+  .#{$block} {
+    @content;
+  }
+}
+@mixin E($elements...) {
+  @at-root {
+    #{&}#{bem-group-append($elements, $element-separator)} {
+      @content;
+    }
+  }
+}
+@mixin M($modifiers...) {
+
+  @at-root {
+    #{&}#{bem-group-append($modifiers, $modifier-separator)} {
+      @content;
+    }
+  }
+}
+
+@mixin BE($elements...) {
+  $block: bem-selector-block(&);
+  & #{$block + bem-group-append($elements, $element-separator)} {
+    @content;
+  }
+}
+
+@mixin BM($modifiers...) {
+  $block: bem-selector-block(&);
+  & #{$block + bem-group-append($modifiers, $modifier-separator)} {
+    @content;
+  }
+}
+
+
+@function bem-helper-modified-element($block, $modifier:false, $element:false) {
+  @if not $modifier and not $element {
+    @return unquote('.#{$block}');
+  }
+  @if $modifier and $element {
+    @return unquote('.#{$block}--#{$modifier} .#{$block}__#{$element}');
+  }
+  @if not $element {
+    @return unquote('.#{$block}--#{$modifier}');
+  }
+  @if not $modifier {
+    @return unquote('.#{$block}__#{$element}');
+  }
+}

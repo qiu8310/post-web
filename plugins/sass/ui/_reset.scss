@@ -1,0 +1,129 @@
+article, aside, canvas, details, figcaption, figure, footer, header, menu, nav, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure, footer, header, menu, nav, section {
+  display: block;
+}
+
+* {
+  box-sizing: border-box;
+}
+*:before, *:after {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-size: $root-font-size;
+  line-height: $root-line-height;
+  font-family: $default-font;
+}
+
+
+// 表单元素不会继承父元素的字体
+button, input, select, textarea {
+  font-family: $default-font;
+}
+
+// 代码片段
+pre, code {
+  font-family: $code-font;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+html, body, ul, li, ol, dl, dd, p {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: normal;
+  @include mp();
+}
+
+h1 {
+  letter-spacing: -1px;
+  font-size: 24px;
+  margin: 10px 0;
+}
+
+h2 {
+  letter-spacing: -1px;
+  font-size: 22px;
+  margin: 20px 0;
+
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 400;
+  margin: 20px 0;
+}
+
+h4 {
+  font-size: 18px;
+  font-weight: 400;
+  margin: 20px 0;
+}
+
+h5 {
+  font-size: 17px;
+  font-weight: 300;
+  margin: 10px 0;
+}
+
+h6 {
+  font-size: 15px;
+  margin: 10px 0;
+  font-weight: 700;
+}
+
+
+
+fieldset, img {
+  border: none;
+  outline: none;
+}
+
+ins, a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a {
+  outline: none !important;
+}
+
+// 去掉 moz 按钮边上的光环
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
+
+// 禁止对 btn 上的文字选择
+button, .button, .btn {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+
+input[type=search]::-webkit-search-cancel-button,
+input[type=search]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+input[type=search] {
+  -webkit-appearance: none;
+}

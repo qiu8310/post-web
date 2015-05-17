@@ -1,0 +1,147 @@
+
+
+@function _to-ratio-number($ratio, $unit-number, $just-ratio: false) {
+  $unit: unit($ratio);
+
+  // 没有单位，表示它就是一个 ratio
+  @if $unit == '' {
+    $ratio: $ratio;
+  } @else if $unit == '%' {
+    $ratio: strip-unit($ratio) / 100;
+  } @else {
+    @if not $just-ratio {
+      @return $ratio;
+    }
+    $ratio: $ratio / $unit-number; // 要保证两个单位相同
+  }
+
+  @return if($just-ratio, $ratio, $unit-number * $ratio);
+}
+
+@function _icon-ratio($icon, $ratio) {
+  $icon: "#{$icon}.png";
+
+  @if $ratio == 1 {
+    @return (1, 1);
+  }
+
+  $ratio-1: _to-ratio-number(nth($ratio, 1), image-width($icon), true);
+  $ratio-2: $ratio-1;
+  @if length($ratio) > 1 {
+    $ratio-2: _to-ratio-number(nth($ratio, 1), image-height($icon), true);
+  }
+
+  @return ($ratio-1, $ratio-2);
+}
+
+@function image-width-ratio($icon, $ratio: 1) {
+  $icon-path: "#{$icon}.png";
+  $width: image-width($icon-path);
+
+  @return _to-ratio-number($ratio, $width);
+}
+
+@function image-height-ratio($icon, $ratio: 1) {
+  $icon-path: "#{$icon}.png";
+  $height: image-height($icon-path);
+
+  @return _to-ratio-number($ratio, $height);
+}
+
+@mixin image-size-ratio($icon, $ratio: 1) {
+  $ratio: _icon-ratio($icon, $ratio);
+  width: image-width-ratio($icon, nth($ratio, 1));
+  height: image-height-ratio($icon, nth($ratio, 2));
+}
+
+@mixin bg($icon, $ratio: 1, $position: false) {
+  $ratio: _icon-ratio($icon, $ratio);
+  $width: image-width-ratio($icon, nth($ratio, 1));
+  $height: image-height-ratio($icon, nth($ratio, 2));
+
+  background-image: image-url("#{$icon}.png");
+  background-repeat: no-repeat;
+  background-size: $width $height;
+  @if $position {
+    background-position: $position;
+  }
+}
+
+
+
+$_sprites: ();
+$_sprites-call: ();
+$_sprite-default-dir: sp;
+
+@function _get-sprite-map($folder) {
+  $sprite-map: null;
+  @if map-has-key($_sprites, $folder) {
+    $sprite-map: map-get($_sprites, $folder);
+
+    $call-time: map-get($_sprites-call, $folder);
+    $_sprites-call: map-set($_sprites-call, $folder, $call-time + 1) !global;
+
+  } @else {
+    // $sprite-map: sprite-map("#{$folder}/*.png", $layout: smart, $spacing: 4px);
+    $sprite-map: sprite-map("#{$folder}/*.png", $spacing: 4px);
+    $_sprites: map-set($_sprites, $folder, $sprite-map) !global;
+    $_sprites-call: map-set($_sprites-call, $folder, 1) !global;
+  }
+  @return $sprite-map;
+}
+
+@mixin sprite-pos($icon, $ratio: 1, $folder: $_sprite-default-dir) {
+  // 算出整个 sprite 需要绽放的倍数
+  $ratio: _icon-ratio("#{$folder}/#{$icon}", $ratio);
+  $ratio_1: nth($ratio, 1);
+  $ratio_2: nth($ratio, 2);
+
+  $sprite-map: _get-sprite-map($folder);
+  $pos: sprite-position($sprite-map, $icon);
+  background-position: nth($pos, 1) * $ratio_1 nth($pos, 2) * $ratio_2;
+}
+
+@mixin sprite-2x-pos($icon, $folder: $_sprite-default-dir) {
+  @include sprite-pos($icon, 50%, $folder);
+}
+
+
+@mixin sprite($icon, $ratio: 1, $size: true, $folder: $_sprite-default-dir) {
+  $sprite-map: _get-sprite-map($folder);
+  $sprite-path: sprite-path($sprite-map);
+  $icon-path: "#{$folder}/#{$icon}.png";
+
+  background-image: sprite-url($sprite-map);
+
+  $icon-width: image-width($icon-path);
+  $icon-height: image-height($icon-path);
+
+
+  // 算出整个 sprite 需要绽放的倍数
+  $ratio: _icon-ratio("#{$folder}/#{$icon}", $ratio);
+  $ratio_1: nth($ratio, 1);
+  $ratio_2: nth($ratio, 2);
+
+
+  @if $ratio_1 != 1 and $ratio_2 != 1  {
+    $sp-width: image-width($sprite-path);
+    $sp-height: image-height($sprite-path);
+    background-size: round($sp-width * $ratio_1) round($sp-height * $ratio_2);
+  }
+
+  $pos: sprite-position($sprite-map, $icon);
+  background-position: nth($pos, 1) * $ratio_1 nth($pos, 2) * $ratio_2;
+
+  @if $size {
+    display: if($size == true, inline-block, $size);
+    width: round($icon-width * $ratio_1);
+    height: round($icon-height * $ratio_2);
+  }
+}
+
+@mixin sprite-2x($icon, $size: true, $folder: $_sprite-default-dir) {
+  @include sprite($icon, 50%, $size, $folder);
+}
+
+
+

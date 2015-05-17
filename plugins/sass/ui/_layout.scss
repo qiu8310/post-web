@@ -1,0 +1,55 @@
+html {
+  position: relative;
+  overflow-x: hidden;
+  height: 100%;
+
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -ms-tap-highlight-color: rgba(0, 0, 0, 0);
+  tap-highlight-color: rgba(0, 0, 0, 0);
+
+  // In addition in IE10, also add this CSS rule to remove the ghost click delay
+  // http://ariatemplates.com/blog/2014/05/ghost-clicks-in-mobile-browsers/
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+body {
+  padding: 0;
+  margin-right: auto;
+  margin-left: auto;
+  overflow: hidden;
+}
+
+html, body {
+  display: block;
+  min-height: 100%;
+  background: #ebebeb;
+  //background: image-url("bg.png");
+}
+
+body.has-footer {
+  padding-bottom: $footer-height;
+}
+
+
+.flex {
+  display: flex;
+  .flex-1 {
+    flex: 1;
+  }
+}
+
+.mask {
+  @include position(fixed, 0);
+  @include z-index(mask);
+  background-color: rgba(0, 0, 0, .7);
+
+  & > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

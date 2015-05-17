@@ -1,0 +1,30 @@
+.disabled, [disabled], [class*=disabled] {
+  pointer-events: none !important;
+}
+
+.link, .btn {
+  cursor: pointer;
+}
+
+.link, .link:link, .link:visited {
+  color: $blue;
+}
+.link:active, .link:hover {
+  opacity: .8;
+}
+.link.disabled {
+  color: $color-c;
+}
+
+
+.btn:active, .btn:hover {
+  opacity: .8;
+}
+.btn.disabled {
+  background-color: #E5E5EA;
+  color: $color-c;
+  opacity: .8;
+}
+.ng-click-active {
+  opacity: .8;
+}

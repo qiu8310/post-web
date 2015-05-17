@@ -1,0 +1,121 @@
+// 这里的模块都是小的 BEM 模块，一般是嵌入在其它 BEM 模块内用
+// 所以当不嵌入其它模块时尽量少给这些模块设置属性
+
+
+
+
+/*
+  list 模块:
+  list__item list__item--disabled list__item--active
+  list__item__link
+  list__item__link__text
+
+  @example:
+  <ul class="list">
+    <li class="list__item list__item--active">
+      <a class="list__item__link">
+        <span class="list__item__link__text">Link</span>
+      </a>
+    </li>
+  </ul>
+*/
+
+@mixin bem-list {
+  @at-root {
+    #{&} .list {
+      @content;
+    }
+  }
+}
+
+@mixin bem-list-item {
+  @at-root {
+    #{&} .list__item {
+      @content;
+    }
+  }
+}
+
+@mixin bem-list-first-item {
+  @at-root {
+    #{&} .list__item:first-child {
+      @content;
+    }
+  }
+}
+@mixin bem-list-last-item {
+  @at-root {
+    #{&} .list__item:last-child {
+      @content;
+    }
+  }
+}
+
+@mixin bem-list-active-item {
+  @at-root {
+    #{&} .list__item--active {
+      @content;
+    }
+  }
+}
+
+@mixin bem-list-disabled-item {
+  @at-root {
+    #{&} .list__item--disabled {
+      @content;
+    }
+  }
+}
+
+@mixin bem-list-item-link {
+  @at-root {
+    #{&} .list__item__link {
+      @content;
+    }
+  }
+}
+@mixin bem-list-item-link-text {
+  @at-root {
+    #{&} .list__item__link__text {
+      @content;
+    }
+  }
+}
+
+
+
+/*
+  search 模块
+  search search--on-focus search--on-keyword
+  search__form
+  search__history
+  search__result
+*/
+@mixin bem-search($modifier: false) {
+  @at-root {
+    #{&} #{bem-helper-modified-element(search, $modifier)} {
+      @content;
+    }
+  }
+}
+@mixin bem-search-form($modifier: false) {
+  @at-root {
+    #{&} #{bem-helper-modified-element(search, $modifier, form)} {
+      @content;
+    }
+  }
+}
+@mixin bem-search-history($modifier: false) {
+  @at-root {
+    #{&} #{bem-helper-modified-element(search, $modifier, history)} {
+      @content;
+    }
+  }
+}
+@mixin bem-search-result($modifier: false) {
+  @at-root {
+    #{&} #{bem-helper-modified-element(search, $modifier, result)} {
+      @content;
+    }
+  }
+}

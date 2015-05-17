@@ -1,0 +1,21 @@
+.swipe-page {
+
+  &.up {
+    .page {
+      transform-origin: center top;
+    }
+  }
+
+  &.down {
+    .page {
+      transform-origin: center bottom;
+    }
+  }
+
+  .page {
+    transform: translate(0, 100%) scale(0);
+  }
+  .page.active {
+    transform: translate(0, 0) scale(1);
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "post-web",
+  "description": "Process web source file to deployable file.",
+  "version": "0.0.0",
+  "homepage": "https://github.com/qiu8310/post-web",
+  "bugs": "https://github.com/qiu8310/post-web/issues",
+  "license": "MIT",
+  "main": "src/post-web.js",
+  "author": {
+    "name": "Zhonglei Qiu",
+    "email": "qiuzhongleiabc@126.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qiu8310/post-web"
+  },
+  "keywords": [
+    "post-web",
+    "sass",
+    "css"
+  ],
+  "dependencies": {
+    "async": "^0.9.0",
+    "chalk": "^1.0.0",
+    "clean-css": "^3.2.10",
+    "commander": "^2.8.1",
+    "cross-spawn": "^0.4.0",
+    "cssgrace": "^2.0.2",
+    "cssnext": "^1.4.0",
+    "dargs": "^4.0.0",
+    "debug": "2.2.0",
+    "fs-extra": "^0.18.3",
+    "glob": "^5.0.6",
+    "imagemin": "^3.2.0",
+    "jade": "^1.9.2",
+    "lodash": "^3.8.0",
+    "look-up": "^0.7.1",
+    "mkdirp": "^0.5.1",
+    "postcss": "^4.1.10",
+    "postcss-colormin": "^1.2.3",
+    "pretty-bytes": "^1.0.4"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.8",
+    "gulp-jscs": "^1.6.0",
+    "gulp-jshint": "^1.9.4",
+    "gulp-mocha": "^2.0.0",
+    "gulp-istanbul": "^0.8.1",
+    "coveralls": "^2.11.1",
+    "should": "^6.0.1",
+    "jshint-stylish": "^1.0.1",
+    "gulp-load-plugins": "^0.10.0",
+    "gulp-plumber": "^1.0.0"
+  },
+  "bin": {
+    "postweb": "cli.js",
+    "pweb": "cli.js"
+  },
+  "scripts": {
+    "coveralls": "gulp test && cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test": "gulp test"
+  }
+}

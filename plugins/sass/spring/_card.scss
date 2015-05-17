@@ -1,0 +1,87 @@
+@keyframes move-up {
+  0% { -webkit-transform: translateY(100%); opacity:0;}
+  50% { -webkit-transform: translateY(0%); opacity:1;}
+  100% { -webkit-transform: translateY(-100%); opacity:0;}
+}
+
+.spring-card-ctrl {
+  body {
+    background-color: transparent !important;
+    background: none !important;
+  }
+
+  .container {
+    position: relative;
+  }
+
+  .arrow-up {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    height: image-height-ratio('spring/sp/up', 0.5) * 2;
+    width: image-width-ratio('spring/sp/up', 0.5);
+
+    &::after {
+      content: '';
+      @include sprite-2x(up, true, 'spring/sp');
+      animation: move-up 1.5s ease infinite;
+    }
+  }
+
+  .btn {
+    position: absolute;
+    z-index: 100;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+  }
+
+  .page-last-active ~ .arrow-up {
+    display: none;
+  }
+
+
+
+  .pages, .page {
+    display: block;
+    @include position(fixed, 0);
+    overflow: hidden;
+  }
+  .page::before {
+    content: '';
+    width: 320px;
+    position: absolute;
+    top: 125px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .page-3::before {
+    top: auto;
+    bottom: 0;
+  }
+
+  .page-1::before {@include sprite-2x(1, block, 'spring/card');}
+  .page-2::before {@include sprite-2x(2, block, 'spring/card');}
+  .page-3::before {@include sprite-2x(3, block, 'spring/card');}
+  .page-4::before {@include sprite-2x(4, block, 'spring/card');}
+  .page-5::before {@include sprite-2x(5, block, 'spring/card');}
+
+
+  .page-1 {
+    background-color: #ef4a41;
+    @include bg('spring/top-stripe', 0.5, center top);
+    background-size: 100% image-height-ratio('spring/top-stripe', 0.5);
+
+    &::after {
+      content: '';
+      @include size(100%, block);
+      @include bg('spring/bottom-stripe', 0.5, center bottom);
+      background-size: 100% image-height-ratio('spring/bottom-stripe', 0.5);
+    }
+  }
+  .page-2 { background-color: #ff6349; }
+  .page-3 { background-color: #ffa439; }
+  .page-4 { background-color: #55589a; }
+  .page-5 { background-color: #7f2e2e; }
+}
