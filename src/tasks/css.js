@@ -28,7 +28,7 @@ function css(options, next) {
   }
 
   if (options.cssDir) {
-    //cssDirs.push(options.cssDir);
+    cssDirs.push(options.cssDir);
   }
 
   if (!cssDirs.length) {

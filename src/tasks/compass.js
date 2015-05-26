@@ -14,9 +14,9 @@ var dargs = require('dargs'),
   _ = require('lodash'),
   debug = require('debug')('post:compass');
 
-var spawn = require('./lib/spawn'),
-  CpsBoot = require('./lib/compass-bootstrap.js'),
-  helper = require('./helper');
+var spawn = require('./../lib/spawn'),
+  CpsBoot = require('./../lib/compass-bootstrap'),
+  helper = require('./../helper');
 
 
 /**
@@ -78,7 +78,7 @@ function compass (options, next) {
 
 
   // 加载 plugins 中的插件
-  var pluginDir = path.resolve(__dirname, '../plugins');
+  var pluginDir = path.resolve(__dirname, '../../plugins');
   var mySassExtensions = glob.sync(path.join(pluginDir, 'extensions/**/*.rb'));
   ['compass/import-once/activate', 'ceaser-easing'].concat(mySassExtensions).forEach(function(req) {
     debug('require', req);

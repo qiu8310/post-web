@@ -15,9 +15,9 @@ var _ = require('lodash'),
 
   locate = require('./lib/locate'),
   helper = require('./helper'),
-  compass = require('./compass'),
-  image = require('./image'),
-  css = require('./css');
+  compass = require('./tasks/compass'),
+  image = require('./tasks/image'),
+  css = require('./tasks/css');
 
 /**
  * 绑定一些参数到每个 task 上
@@ -59,13 +59,18 @@ function postWeb(dir, options) {
 
     // 常用文件的后缀名
     ext: {
-      sass: ['sass', 'scss'],
       css: ['css'],
       js: ['js', 'jsx', 'coffee'],
-      html: ['slim', 'html', 'htm', 'jade'],
-      fonts: ['eot', 'ttf', 'woff', 'woff2'],
+      html: ['html', 'htm', 'md', 'jade', 'slim', 'haml'],
+
+      sass: ['sass', 'scss'],
+      templates: ['html', 'htm', 'md', 'jade', 'slim', 'haml'],
       styles: ['css', 'sass', 'scss'],
-      images: ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp']
+      scripts: ['js', 'jsx', 'coffee'],
+
+      // fonts 和 images 中都可能含有 svg 文件，所以两处都不要写它
+      images: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+      fonts: ['eot', 'ttf', 'woff', 'woff2']
     },
 
     compass: {

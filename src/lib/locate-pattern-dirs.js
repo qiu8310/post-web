@@ -166,7 +166,9 @@ function findPatternDirectoriesIn(pattern, directory, ignores) {
     ignore: getIgnores(directory).concat(ignores || [])
   });
 
-  return getFilesParentDirectories(files);
+  return getFilesParentDirectories(files).map(function(dir) {
+    return path.join(directory, dir);
+  });
 }
 
 module.exports = findPatternDirectoriesIn;

@@ -28,7 +28,7 @@
     "cssgrace": "^2.0.2",
     "cssnext": "^1.4.0",
     "dargs": "^4.0.0",
-    "debug": "2.2.0",
+    "ylog": "^0.1.0",
     "fs-extra": "^0.18.3",
     "glob": "^5.0.6",
     "imagemin": "^3.2.0",
@@ -41,16 +41,16 @@
     "pretty-bytes": "^1.0.4"
   },
   "devDependencies": {
+    "coveralls": "^2.11.1",
     "gulp": "^3.8.8",
+    "gulp-istanbul": "^0.8.1",
     "gulp-jscs": "^1.6.0",
     "gulp-jshint": "^1.9.4",
-    "gulp-mocha": "^2.0.0",
-    "gulp-istanbul": "^0.8.1",
-    "coveralls": "^2.11.1",
-    "should": "^6.0.1",
-    "jshint-stylish": "^1.0.1",
     "gulp-load-plugins": "^0.10.0",
-    "gulp-plumber": "^1.0.0"
+    "gulp-mocha": "^2.0.0",
+    "gulp-plumber": "^1.0.0",
+    "jshint-stylish": "^1.0.1",
+    "should": "^6.0.1"
   },
   "bin": {
     "postweb": "cli.js",

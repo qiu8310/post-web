@@ -42,9 +42,19 @@ module.exports = function(options) {
     };
 
   // assetDir 可能是用户配置的，它可能是相对于当前目录，也可能是相对于 projectDir，这里自动判断哪个文件存在就用哪个
-  if (assetDir) {
-    assetDir = helper.relativePath(assetDir, projectDir);
-  }
+  if (assetDir) { assetDir = helper.relativePath(assetDir, projectDir); }
+
+  // 保存各类文件所在的目录
+  //options.src = {};
+  //options.dist = {};
+  //var locateBaseDir = assetDir || projectDir, foundAnyTypedFiles;
+  //['styles', 'scripts', 'templates', 'sass', 'images', 'fonts'].forEach(function(key) {
+  //  var ignoreDistDirPattern = path.relative(locateBaseDir, distDir) + '/**';
+  //  var typedFileDirs = locatePatternDirs(getPattern(key), locateBaseDir, ignoreDistDirPattern);
+  //
+  //
+  //
+  //});
 
   var locateDir = assetDir || projectDir, foundAny;
   var fileTypes = ['sass', 'css', 'images', 'fonts', 'js', 'html'];
@@ -55,7 +65,7 @@ module.exports = function(options) {
     });
     var optKey = key + 'Dir';
     if (!dirs.length) {
-      console.out('yellow', 'locate', key + ' directory not found');
+      console.out('yellow', 'locate', key + ' directory: ' + chalk.gray('(not found)'));
       options[optKey] = false;
     } else if (dirs.length === 1) {
       console.out('green', 'locate', key + ' directory: ' + chalk.cyan(dirs[0]));
@@ -85,15 +95,16 @@ module.exports = function(options) {
 
 
   // 确定 xxxDistDir
+  // @TODO 不需要 xxxDistDir ， 只需要一个 dist 和 distFile 函数就行了，注意（coffee, sass 这些文件夹）
   fileTypes.forEach(function(key) {
     var optKey = key + 'Dir', optDistKey = (key === 'sass' ? 'css' : key) + 'DistDir';
 
     if (!options[optKey]) {
-      options[optKey] = false;
+      options[optDistKey] = false;
     } else {
       var target = path.relative(assetDir, options[optKey]);
-      if (key === 'sass') {
-        target = target.replace(/[\w-]+$/, 'css');
+      if (key === 'sass' || key === 'css') {  // @TODO a little trick, fix it (css 或 saa 必须放到一个文件夹内？)
+        target = target.replace(/(sass|scss)$/, 'css');
       }
       options[optDistKey] = path.join(distDir, target);
 

@@ -39,6 +39,8 @@ pweb --help # 查看帮助
 
 ### [compass](http://compass-style.org/)
 
+__使用的是系统的 compass 命令__
+
 compass 会自动 require 这几个项目：
 
 - [compass/import-once/activate](https://github.com/Compass/compass/tree/master/import-once)
@@ -113,12 +115,16 @@ clean-css 定义了很多优化 css 规则，如果发现你的样式在低版�
 
 ## HTML 处理流
 
-markdown, slim, haml, jade
+- [haml](http://haml.info/docs/yardoc/file.REFERENCE.html): 使用系统的 haml 命令
+- [slim](http://www.rubydoc.info/gems/slim/frames): 使用系统的 slim 命令
+markdown, slim, haml, jade, ejs
 
 
 ## JS 处理流
 
 coffee, liveScript, typeScript, dart, atScript
+
+jsx, cjsx (coffee jsx)
 
 
 

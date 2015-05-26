@@ -25,7 +25,8 @@ function image(options, next) {
     minOpts = options.imagemin,
     minify = ('minify' in imageOpts) ? imageOpts.minify : options.minify,
     imagesDir = options.imagesDir,
-    imagesGenDir = path.join(projectDir, options.compass.generatedImagesPath),
+    // TODO 没有执行 compass
+    imagesGenDir = path.join(projectDir, options.compass.generatedImagesPath || 'images/gen'),
 
     imagesDistDir = options.imagesDistDir;
 
@@ -97,6 +98,9 @@ function image(options, next) {
           } else {
             msg = 'saved ' + prettyBytes(diffSize) + ' - ' + (diffSize / origSize * 100).toFixed() + '%';
           }
+          // ℡ (U+2121), ☎ (U+260E), ☏ (U+260F), ✆ (U+2706)
+          // ✓ ✔ ☑
+          // ✗ ✘ ☒
           console.out('✔ ', f, chalk.gray('(' + msg + ')'));
         } else {
           console.out('copy', f, '=>', target);
