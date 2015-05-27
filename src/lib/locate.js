@@ -7,109 +7,97 @@
  */
 
 var path = require('path'),
-  chalk = require('chalk'),
-  fs = require('fs-extra');
+  fs = require('fs-extra'),
+  _ = require('lodash'),
+  ylog = require('ylog')('post:locate');
 
 var locatePatternDirs = require('./locate-pattern-dirs'),
-  helper = require('./../helper');
+  h = require('./../helper');
+
+
+
+// 排除 用户指定的要忽略的文件夹 及 distDir
+function getIgnoresFromLocateBaseDir(locateBaseDir, options) {
+  var ignores = _.map(options.excludeDirs.concat(options.distDir), function(dir) {
+    return path.relative(locateBaseDir, path.join(dir, '**'));
+  });
+  ylog.silly('locating directories exclude those file patterns ^%o^', ignores);
+  return ignores;
+}
 
 /**
  *
- * 得到 sassDir, assetDir, jsDir, imagesDir, fontsDir
+ * 得到 styles, scripts, templates, images, fonts 对应的目录
  * 它们都是相对于 projectDir 的一个目录
  *
- * 得到 cssDistDir, jsDistDir, imagesDistDir, fontsDistDir
- *
- * 同时，将 assetDir 目录下的所有文件的后缀名小写
+ * // 同时，将 assetDir 目录下的所有文件的后缀名小写（会影响 glob 匹配）（还是不要这样做了）
  *
  * @param {Object} options
  */
 module.exports = function(options) {
-  var ext = options.ext;
+  var cfg = options.locate;
 
   var assetDir = options.assetDir,
     distDir = options.distDir,
-    projectDir = options.projectDir,
-
-    getPattern = function (key) {
-      var es = [].concat(ext[key]);
-      if (es.length > 1) {
-        es = '{' + es.join(',') + '}';
-      } else if (!es.length) {
-        throw new Error('Extensions for ' + key + ' not found.');
-      }
-      return (key === 'sass' ? '**/[!_]*.' : '**/*.') + es;
-    };
-
-  // assetDir 可能是用户配置的，它可能是相对于当前目录，也可能是相对于 projectDir，这里自动判断哪个文件存在就用哪个
-  if (assetDir) { assetDir = helper.relativePath(assetDir, projectDir); }
+    projectDir = options.projectDir;
 
   // 保存各类文件所在的目录
-  //options.src = {};
-  //options.dist = {};
-  //var locateBaseDir = assetDir || projectDir, foundAnyTypedFiles;
-  //['styles', 'scripts', 'templates', 'sass', 'images', 'fonts'].forEach(function(key) {
-  //  var ignoreDistDirPattern = path.relative(locateBaseDir, distDir) + '/**';
-  //  var typedFileDirs = locatePatternDirs(getPattern(key), locateBaseDir, ignoreDistDirPattern);
-  //
-  //
-  //
-  //});
+  var locateBaseDir = assetDir || '.'; // . 表示的是 projectDir，因为默认的 projectDir 是 absolute path
 
-  var locateDir = assetDir || projectDir, foundAny;
-  var fileTypes = ['sass', 'css', 'images', 'fonts', 'js', 'html'];
-  fileTypes.forEach(function(key) {
-    var ignore = path.relative(locateDir, distDir) + '/**';
-    var dirs = locatePatternDirs(getPattern(key), locateDir, ignore).map(function(dir) {
-      return path.join(locateDir, dir);
-    });
-    var optKey = key + 'Dir';
-    if (!dirs.length) {
-      console.out('yellow', 'locate', key + ' directory: ' + chalk.gray('(not found)'));
-      options[optKey] = false;
-    } else if (dirs.length === 1) {
-      console.out('green', 'locate', key + ' directory: ' + chalk.cyan(dirs[0]));
-      options[optKey] = dirs[0];
-      foundAny = true;
-      if (!assetDir && key !== 'html') {
-        assetDir = path.dirname(dirs[0]);
-        // 不这样的话，根目录下有很多 js 文件，很容易把根目录当作 jsDir，所以上面也是把 js 和 html 放在最后定位
-        locateDir = assetDir;
-      }
-    } else {
-      throw new Error('Found ' + key + ' files in ' + dirs.length + ' directories: ' + dirs.join(', '));
+  var ignores = getIgnoresFromLocateBaseDir(locateBaseDir, options), foundAny;
+
+  _.each(cfg, function(exts, key) {
+    ylog.debug('locating @%s@ directory by searching file extensions ^%o^', key, exts);
+    var locatedDirs = locatePatternDirs('**/[^_]*.' + h.getGlobPatternFromList(cfg[key]), locateBaseDir, ignores);
+
+    switch (locatedDirs.length) {
+      case 0:
+        //options.src[key] = false;
+        //options.dist[key] = false;
+        ylog.info('located @%s@ directory: *(none)*', key);
+        break;
+      case 1:
+        foundAny = true;
+        var locatedDir = path.relative(projectDir, locatedDirs[0]) || '.'; // 两个目录一样会返回空字符串
+        ylog.info('located @%s@ directory: ^%s^', key, locatedDir);
+
+        // 如果没有设置 assetDir，则把当前目录的父目录设置成 assetDir
+        // 有可能 css 和 html 在同一个文件夹下
+        if (!assetDir) {
+          assetDir = path.dirname(locatedDir);
+          options.assetDir = assetDir;
+          ylog.info('assume your asset directory is ^%s^', assetDir);
+
+          if (locateBaseDir !== assetDir) {
+            locateBaseDir = assetDir;
+            ignores = getIgnoresFromLocateBaseDir(locateBaseDir, options);
+          }
+        }
+        options.src[key] = locatedDir;
+        options.dist[key] = path.join(distDir, path.relative(assetDir, locatedDir));
+
+        // 临时文件可能是和项目文件夹同一级别，它可能不在 projectDir 中
+        options.tmp[key] = path.relative(projectDir, path.join(path.dirname(path.resolve(locatedDir)), '.tmp-' + key));
+        break;
+      default :
+        ylog.fatal('#%s files directory should be in one directory, two located: %o#', key, locatedDirs);
+        throw new Error(key + ' files not in one directory');
     }
   });
+
 
   if (!foundAny) {
-    console.out('yellow', 'locate', 'not found any asset files, exit!');
-    process.exit(0);
+    ylog.fatal('#located no files#');
+    throw new Error('located no files');
   }
 
-
-  options.assetDir = assetDir;
-
-
-  // 清空 distDir （清空后图片得重新压缩，太慢了）
-  //fs.emptyDirSync(options.distDir);
+  ylog.ok('src directory:', options.src);
+  ylog.ok('dist directory:', options.dist);
 
 
-  // 确定 xxxDistDir
-  // @TODO 不需要 xxxDistDir ， 只需要一个 dist 和 distFile 函数就行了，注意（coffee, sass 这些文件夹）
-  fileTypes.forEach(function(key) {
-    var optKey = key + 'Dir', optDistKey = (key === 'sass' ? 'css' : key) + 'DistDir';
-
-    if (!options[optKey]) {
-      options[optDistKey] = false;
-    } else {
-      var target = path.relative(assetDir, options[optKey]);
-      if (key === 'sass' || key === 'css') {  // @TODO a little trick, fix it (css 或 saa 必须放到一个文件夹内？)
-        target = target.replace(/(sass|scss)$/, 'css');
-      }
-      options[optDistKey] = path.join(distDir, target);
-
-      fs.ensureDirSync(options[optDistKey]);
-    }
-  });
-
+  // 清空 distDir （清空后图片得重新压缩，太慢了，所以只有在发布的时候才清空）
+  if (options.environment === 'production') {
+    fs.emptyDirSync(options.distDir);
+    ylog.info('empty dist directory ^%s^', options.distDir);
+  }
 };

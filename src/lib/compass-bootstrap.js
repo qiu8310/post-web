@@ -69,7 +69,7 @@ function Bootstrap(sassDir, options) {
   this.sassFiles = _.map(sassFiles, function(file) {
     var isSass = /\.sass$/.test(file);
     var content = helper.readFile(file), trippedContent, newContent;
-    var base = path.basename(file).replace(/\.\w$/, '');
+    var base = path.basename(file).replace(/\.\w*$/, '');
 
     // 找到是否有和它重名的 .require 文件
     var reqFile = glob.sync(root + '/' + base + '.require', reqGlobOpts).shift() || commonRequire;

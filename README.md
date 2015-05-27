@@ -15,6 +15,12 @@
 - 将 slim、jade 编译成 html
 
 
+NOTE:
+
+* 所有以 _ 开头的文件都会当作 partial，不会编译
+* （要做，因为 compass 会编译）另外 styles 或 scripts 子目录中的文件也不会被编译，它们也被当作 partial
+
+
 ## Usage
 
 ### 先全局安装
@@ -33,6 +39,20 @@ pweb [options] [directory]
 pweb --help # 查看帮助
 
 ```
+
+### Styles
+
+* sass    - 系统需要安装 compass 1.0.*
+* stylus  - 系统需要安装 stylus 0.51.*
+* less    - 系统需要安装 less 2.5.*
+
+### Templates
+
+* markdown
+* jade
+* slim
+* haml
+
 
 
 ## SASS 处理流

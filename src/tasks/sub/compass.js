@@ -14,9 +14,9 @@ var dargs = require('dargs'),
   _ = require('lodash'),
   debug = require('debug')('post:compass');
 
-var spawn = require('./../lib/spawn'),
-  CpsBoot = require('./../lib/compass-bootstrap'),
-  helper = require('./../helper');
+var spawn = require('./../../lib/spawn'),
+  CpsBoot = require('./../../lib/compass-bootstrap'),
+  helper = require('./../../helper');
 
 
 /**

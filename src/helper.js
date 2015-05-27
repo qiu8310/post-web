@@ -8,6 +8,7 @@
 
 var fs = require('fs-extra'),
   _ = require('lodash'),
+  glob = require('glob'),
   path = require('path');
 
 var EOL = require('os').EOL;
@@ -24,6 +25,46 @@ var helper = {
    * @type {String}
    */
   EOL: EOL,
+
+  /**
+   * 得到文件的不带 . 的后缀名（可能是空字符串）
+   * @param {string} file
+   * @returns {string}
+   */
+  ext: function(file) {
+    return path.extname(file).substr(1).toLowerCase();
+  },
+
+  /**
+   * 从一个数组中得到一个 glob 的 pattern
+   * @param {Array} arr
+   * @returns {String}
+   */
+  getGlobPatternFromList: function(arr) {
+    switch (arr.length) {
+      case 0:
+        return '';
+      case 1:
+        return arr[0];
+      default:
+        return '{' + arr.join(',') + '}';
+    }
+  },
+
+  findFilesByPattern: function(pattern) {
+    return glob.sync(pattern, {
+      dot: false,
+      nocase: true,
+      nosort: true,
+      nodir: true,
+      ignore: []
+    });
+  },
+
+  findFilesByExtensions: function(dir, extensions, deep) {
+    var pattern = path.join(dir, (deep ? '**/' : '') + '[!_]*.');
+    return this.findFilesByPattern(pattern + this.getGlobPatternFromList(extensions));
+  },
 
   /**
    *
@@ -108,13 +149,13 @@ var helper = {
   /**
    * 封装回调函数
    * @param {Function} fn
-   * @param {Object} options
+   * @param {Array} args
    */
-  wrap: function(fn, options) {
-    return function(next) {
-      try {
-        fn(options, next);
-      } catch(e) { next(e); }
+  asyncCallback: function(fn, args) {
+    args = args || [];
+    return function(cb) {
+      args.push(cb);
+      fn.apply(null, args);
     };
   }
 };

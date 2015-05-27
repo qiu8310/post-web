@@ -43,6 +43,8 @@ program
   .parse(process.argv);
 
 
+// @TODO 这里配置的所有目录都要转化成相对于 projectDir 的目录
+
 var dir = program.args[0] || '.';
 var command = 'compile';
 var prod = program.production || program.environment && 'production'.indexOf(program.environment) === 0;
@@ -51,7 +53,7 @@ var opts = {
   quiet: program.quiet,
   environment: prod ? 'production' : 'development',
   minify: prod || program.minify,
-  distDir: program.distDir || path.join(dir, 'public'),
+  distDir: program.distDir || 'dist',
   assetDir: program.assetDir,
   mobile: program.mobile,
 

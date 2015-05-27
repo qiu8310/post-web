@@ -6,129 +6,86 @@
  * Licensed under the MIT license.
  */
 
+process.env.YLOG = (process.env.YLOG ? process.env.YLOG + ',' : '') + 'post:web';
 
 var _ = require('lodash'),
-  debug = require('debug')('post:web'),
-  chalk = require('chalk'),
+  ylog = require('ylog')('post:web'),
   path = require('path'),
   async = require('async'),
 
   locate = require('./lib/locate'),
-  helper = require('./helper'),
-  compass = require('./tasks/compass'),
-  image = require('./tasks/image'),
-  css = require('./tasks/css');
+  h = require('./helper');
 
-/**
- * 绑定一些参数到每个 task 上
- * @param {Function} tasks
- * @returns {Array}
- */
-function wrapTasks(tasks) {
-  var args = [].slice.call(arguments, 1);
-  return tasks.map(function(task) {
-    return helper.wrap.apply(helper, [task].concat(args));
-  });
-}
+ylog.attributes.time = true;
+ylog.setLevel('info');
+ylog.Tag.ns.len = 15;
+ylog.Tag.ns.align = 'right';
 
-function cbThrow(err) { if (err) { throw err; } }
 
 function postWeb(dir, options) {
 
-  if (!helper.isDirectory(dir)) { throw new Error('Parameter <dir [' + dir + ']> should be a directory.'); }
+  dir = path.resolve(dir);
+  process.chdir(dir); // 如果目录不存在，这里会抛出异常，就不需要我去控制了
 
-  console.out = function () {
-    var args = [].slice.call(arguments);
+  var pkg = h.safeReadJson(dir, 'package.json'),
+    bkg = h.safeReadJson(dir, 'bower.json'),
+    projectName = pkg.name || bkg.name,
+    projectVersion = pkg.version || bkg.version;
 
-    if (!options.quiet || args[0] === 'red') {
-      var color = _.includes(['green', 'red', 'yellow', 'blue', 'cyan', 'gray'], args[0]) ? args.shift() : 'green';
-
-      var hasColor = chalk.hasColor(args[0]);
-      args[0] = _.repeat(' ', 9 - chalk.stripColor(args[0]).length) + args[0];
-      if (!hasColor) { args[0] = chalk[color](args[0]); }
-      console.log.apply(console, args);
-    }
-  };
-
-  // 配置项
-  options = _.merge({
-    projectDir: dir,
-    distDir: path.join(dir, 'public'),
-    environment: 'development',
-    minify: false,
-
-    // 常用文件的后缀名
-    ext: {
-      css: ['css'],
-      js: ['js', 'jsx', 'coffee'],
-      html: ['html', 'htm', 'md', 'jade', 'slim', 'haml'],
-
-      sass: ['sass', 'scss'],
-      templates: ['html', 'htm', 'md', 'jade', 'slim', 'haml'],
-      styles: ['css', 'sass', 'scss'],
-      scripts: ['js', 'jsx', 'coffee'],
-
-      // fonts 和 images 中都可能含有 svg 文件，所以两处都不要写它
-      images: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
-      fonts: ['eot', 'ttf', 'woff', 'woff2']
-    },
-
-    compass: {
-      command: 'compile',
-      require: []         // 导入需要的 compass 库
-    },
-    css: {
-
-    },
-    cssnext: {
-
-    },
-    cleanCss: {
-
-    },
-    image: {
-      // compass 自动将指定文件夹中的所有图片生成一个 sprite 文件，
-      // 如果此选项是 true，则会忽略这些有生成 sprite 文件的文件夹中的所有图片文件
-      ignoreSpriteSrc: true
-    },
-    // imagemin 的配置选项
-    imagemin: {
-      interlaced: true,
-      progressive: true,
-      optimizationLevel: 3
-    }
-  }, options);
+  if (projectName) {
+    ylog.color('green.bold').info('%s %s', projectName, projectVersion);
+  }
+  ylog.info('project root directory ^%s^', dir);
 
 
-  // 定位 sassDir, imagesDir, jsDir, assetDir
-  // 并且 将 assetDir 下的所有文件的后缀名变成小写的
-  locate(options);
-  console.out('dist dir', options.distDir);
-  console.out('asset dir', options.assetDir);
+  // 初始化配置
+  options = require('./options')(dir, options);
 
-  debug('all options %o', options);
 
+  // 导入项目下常见文件的数据
   _.assign(options, {
-    package: helper.safeReadJson(dir, 'package.json'),
-    bower: helper.safeReadJson(dir, 'bower.json'),
-    bowerrc: helper.safeReadJson(dir, '.bowerrc'),
-    gitignore: helper.safeReadFileList(dir, '.gitignore')
+    projectName: projectName,
+    projectVersion: projectVersion,
+    package: pkg,
+    bower: bkg,
+    bowerrc: h.safeReadJson(dir, '.bowerrc'),
+    gitignore: h.safeReadFileList(dir, '.gitignore')
   });
 
-
-  switch (options.command) {
-    case 'clean':
-      compass(options, cbThrow);
-      break;
-    case 'server':
-      break;
-    case 'watch':
-      break;
-    default :
-      async.series( wrapTasks([compass, css, image], options), cbThrow );
-      break;
+  var bowerDirectory = options.bowerrc.directory || 'bower_components';
+  if (h.isDirectory(bowerDirectory)) {
+    options.bowerDirectory = bowerDirectory;  // 大部分插件都需要将这个目录加入 include path
   }
 
+
+  // 定位每类文件所在的位置，并将其写入 options
+  locate(options);
+
+
+  //
+  //
+  //switch (options.command) {
+  //  case 'clean':
+  //    compass(options, cbThrow);
+  //    break;
+  //  case 'server':
+  //    break;
+  //  case 'watch':
+  //    break;
+  //  default :
+  //    async.series( wrapTasks([compass, css, image], options), cbThrow );
+  //    break;
+  //}
+
+  var Styles = require('./tasks/task-styles');
+  var styles = new Styles(options);
+  styles.compile(function() {
+
+  });
 }
+
+postWeb(process.argv[2] || '.', {assetDir: 't'});
+
+
 
 module.exports = postWeb;

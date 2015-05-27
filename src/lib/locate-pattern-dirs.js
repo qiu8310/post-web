@@ -160,7 +160,7 @@ function findPatternDirectoriesIn(pattern, directory, ignores) {
   var files = glob.sync(pattern, {
     cwd: directory,
     dot: false,
-    nocase: true,
+    nocase: true, // 主要是匹配文件后缀名，文件后缀名大小写不敏感
     nosort: true,
     nodir: true,
     ignore: getIgnores(directory).concat(ignores || [])
