@@ -21,9 +21,7 @@ module.exports = function(args, options, done) {
   options = _.extend({
     env: process.env,
     cwd: process.cwd(),
-    stdin: process.stdin,
-    stdout: null,   // 默认不要执行的命令输出任何东西
-    stderr: process.stderr
+    stdio: 'pipe'
   }, options);
 
 
@@ -37,22 +35,30 @@ module.exports = function(args, options, done) {
   var child = spawn(args.shift(), args, {
     env: options.env,
     cwd: options.cwd,
-    stdio: [
-      options.stdin,
-      options.stdout,
-      options.stderr
-    ]
+    stdio: options.stdio
   });
 
-  child.on('exit', function (code) {
+  var out = [], err = [];
+  child.stdout.on('data', function(data) {
+    out.push(data.toString());
+  });
+
+  child.stderr.on('data', function(data) {
+    err.push(data.toString());
+  });
+
+  child.on('close', function (code) {
     if (done) {
       if (code === 0) {
         ylog.debug('executed ^%s^', cmd);
-        done(null);
+        done(null, out.join(''));
       } else {
-        ylog.fatal('executing error `%s`', cmd);
+        ylog.fatal('executing error `%s`', cmd).ln();
+        ylog.fatal(err.join(''));
         done(new Error('Execute script error.'));
       }
     }
   });
+
+  return child;
 };

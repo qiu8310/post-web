@@ -27,19 +27,15 @@ module.exports = require('./task-base').extend({
   init: function() {
 
     this.name = 'styles';
+    this.targetExt = 'css';
 
-    var types = ['sass', 'less', 'stylus', 'css'];
+    var types = ['compass', 'less', 'stylus', 'css'];
 
     // 查看有没有 sass, less, stylus, css，此函数同时会设置 this.enables 属性
     this.typedFiles = this.getTypedFiles(types, true);
 
-
     // 有 styles 就一定要编译 css
     this.enables.css = true;
-
-    // 所有的 sass 都用 compass 来编译
-    this.enables.compass = this.enables.sass;
-    delete this.enables.sass;
   },
 
   initCompass: function() {
@@ -137,16 +133,16 @@ module.exports = require('./task-base').extend({
     // 执行 compass 命令
     this.run(
       ['compass', 'compile'],
-      {
-        argsOpts: cpsOpts
-      },
-      function(err) {
+      { argsOpts: cpsOpts },
+      function(err, data) {
 
         // 删除 .sass-cache 文件
         fs.removeSync('.sass-cache');
 
         // 恢复 bootstrap
         boot.recover();
+
+        if (!err) { ylog.verbose(data); }
 
         done(err);
       }
@@ -166,10 +162,9 @@ module.exports = require('./task-base').extend({
       tasks = [];
 
     _.each(dirFiles, function(_, dir) {
-      var out = path.join(this.tmp, path.relative(this.src, dir));
-      fs.ensureDirSync(out); // 确保文件存在
+      var outDir = this.getTmpDir(dir);
       tasks.push(function(done) {
-        this.run(['stylus', dir, '--out', out], runOpts, done);
+        this.run(['stylus', dir, '--out', outDir], runOpts, done);
       }.bind(this));
     }, this);
 
@@ -184,9 +179,7 @@ module.exports = require('./task-base').extend({
     var tasks = [];
 
     _.each(this.typedFiles.less, function(file) {
-      var out = path.join(this.tmp, path.relative(this.src, file));
-      out = out.replace(/\.\w+$/, '.css');
-      fs.ensureDirSync(path.dirname(out));
+      var out = this.getTmpFile(file, 'css');
       tasks.push(function(done) {
         this.run(['lessc', file, out], runOpts, done);
       }.bind(this));
@@ -210,20 +203,17 @@ module.exports = require('./task-base').extend({
       plugins.push(function(css) { return cssgrace.postcss(css, {from: cssFile}); });
     }
 
-    ylog.silly('postcss ^%s^', cssFile);
+    ylog.verbose('postcss ^%s^', cssFile);
     content = postcss(plugins).process(content).css;
 
     if (this.minify) {
-      ylog.silly('cleancss ^%s^', cssFile);
+      ylog.verbose('cleancss ^%s^', cssFile);
       var cleancssOpts = this.taskOpts.cleancss;
       cleancssOpts.relativeTo = path.dirname(cssFile);
       content = new CleanCss(cleancssOpts).minify(content).styles;
     }
 
-
-    cssFile = path.join(this.dist, path.relative(this.src, cssFile.replace(this.tmp, this.src)));
-
-    fs.ensureDirSync(path.dirname(cssFile));
+    cssFile = this.getDistFile(cssFile);
     fs.writeFileSync(cssFile, content);
     ylog.debug.writeOk('write to ^%s^', cssFile);
   },

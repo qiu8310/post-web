@@ -81,11 +81,15 @@ function getFilesParentDirectories(files) {
     return path.dirname(file);
   });
 
-  var result = [];
+  var result = [], first;
 
   files.sort(function(a, b) { return a.length - b.length; });
 
-  result.push(files.shift());
+  first = files.shift();
+  result.push(first);
+
+  // 如果是当前目录，则没有比它更上一层的了，直接把它当作父目录了
+  if (first === '.') { return result; }
 
   files.forEach(function(file) {
     var exists;

@@ -40,18 +40,30 @@ pweb --help # 查看帮助
 
 ```
 
+__下面指定的版本号只是我系统上安装过没问题的版本，不代表只能安装此版本，但建议大版本号要一致__
+
 ### Styles
 
-* sass    - 系统需要安装 compass 1.0.*
-* stylus  - 系统需要安装 stylus 0.51.*
-* less    - 系统需要安装 less 2.5.*
+* sass        - 系统需要安装 compass 1.0.*  (`gem install compass`)
+* stylus      - 系统需要安装 stylus 0.51.*  (`npm -g i stylus`)
+* less        - 系统需要安装 less 2.5.*     (`npm -g i less`)
+
+### Scripts
+
+* babel       - 使用内部 babel-core 模块
+* typescript  - 使用内部 typescript 模块 (对 typescript 还不熟悉，是否需要使用全局模块？)
+* coffee      - 系统需要安装 coffee 1.9.*  (`npm -g i coffee-script`)
+* iced        - 系统需要安装 iced-coffee-script 1.8.*  （`npm -g i iced-coffee-script`)
 
 ### Templates
 
-* markdown
-* jade
-* slim
-* haml
+* markdown    - 使用内部 markdown 模块
+* jade        - 使用内部 jade 模块
+* slim        - 系统需要安装 slim 3.0.* (`gem install slim`)
+* haml        - 系统需要安装 haml 4.0.* (`gem install haml`)
+
+
+
 
 
 

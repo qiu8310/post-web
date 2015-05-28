@@ -22,26 +22,12 @@ var options = {
 
   runLimit: os.cpus().length, // 每次最多运行进程的数量
 
-  // 常用文件的后缀名，如果没有设置就表示和文件类型一致，如 js => ['js']
-  extensions: {
-    html: ['html', 'htm'],
-    markdown: ['md', 'markdown'],
-    coffee: ['coffee'],
-    stylus: ['styl'],
-    less: ['less'],
-    sass: ['sass', 'scss']
-  },
-
-  src: {},
-  tmp: {},
-  dist: {},
-
   // 这些后缀名主要用来帮助定位找到对应文件所在的目录
   // 这里的先后顺序也很关键，要先定位 styles 和 scripts，确定 assetDir，再定位剩下的三类。
   // 因为 templates, images, fonts 文件都比较常见，可能会出现在很多地方（比如项目的根目录就会有 md 文件）
   locate: {
     styles: ['css', 'sass', 'scss', 'less', 'styl'],
-    scripts: ['js', 'jsx', 'coffee'],
+    scripts: ['js', 'jsx', 'coffee', 'iced', 'ts'],
 
     templates: ['html', 'htm', 'md', 'jade', 'slim', 'haml'],
 
@@ -50,25 +36,87 @@ var options = {
     fonts: ['eot', 'ttf', 'woff', 'woff2']
   },
 
+  // 常用文件的后缀名，如果没有设置就表示和文件类型一致，如 js => ['js']
+  extensions: {
+    html: ['html', 'htm'],
+    markdown: ['md', 'markdown'],
+    coffee: ['coffee'],
+    stylus: ['styl'],
+    less: ['less'],
+    compass: ['sass', 'scss'],
+    babel: ['jsx'],
+    iced: ['iced'],
+    typescript: ['ts'],
+    img: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
+  },
+
+  src: {},
+  tmp: {},
+  dist: {},
+
   tasks: {
     styles: {
-      compass: {},
+      compass: {
+        importPath: [],
+        require: [] // 导入需要的 compass 库
+      },
       stylus: {},
       less: {},
       postcss: { plugins: [] },
       cleancss: {},
       cssnext: {}
     },
-    scripts: {},
-    templates: {},
-    images: {},
+    scripts: {
+      babel: { ast: false },
+      coffee: {},
+      typescript: {
+        //module: 'commonjs' // commonjs 或 amd
+      }
+    },
+    templates: {
+      htmlMinifier: {
+        collapseWhitespace: true,
+        collapseBooleanAttributes: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        minifyJS: true,
+        minifyCSS: true
+      },
+      jade: {
+        compileDebug: false,
+        pretty: true, // 永远都是 true，要压缩统一用 htmlMinifier
+        data: {
+          title: 'Jade - POST WEB'
+        }
+      },
+      slim: {
+        data: {
+          title: 'Slim - POST WEB'
+        }
+      },
+      haml: {
+        data: {
+          title: 'Haml - POST WEB'
+        }
+      }
+    },
+    images: {
+      imagemin: { // 图片压缩选项
+        interlaced: true,
+        progressive: true,
+        optimizationLevel: 3
+      },
+      img: {}   // 就一个伪造的任务
+    },
     fonts: {}
   }
 
   /*
   compass: {
     command: 'compile',
-    require: []         // 导入需要的 compass 库
+    require: []
   },
   css: {
 

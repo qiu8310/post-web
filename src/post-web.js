@@ -17,7 +17,7 @@ var _ = require('lodash'),
   h = require('./helper');
 
 ylog.attributes.time = true;
-ylog.setLevel('info');
+ylog.setLevel('debug');
 ylog.Tag.ns.len = 15;
 ylog.Tag.ns.align = 'right';
 
@@ -77,9 +77,9 @@ function postWeb(dir, options) {
   //    break;
   //}
 
-  var Styles = require('./tasks/task-styles');
-  var styles = new Styles(options);
-  styles.compile(function() {
+  var Task = require('./tasks/task-images');
+  var t = new Task(options);
+  t.compile(function() {
 
   });
 }

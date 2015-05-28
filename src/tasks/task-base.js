@@ -8,6 +8,7 @@
 
 var _ = require('lodash'),
   path = require('path'),
+  fs = require('fs-extra'),
   async = require('async'),
   spawn = require('../lib/spawn'),
   h = require('../helper'),
@@ -19,6 +20,7 @@ module.exports = require('class-extend').extend({
   constructor: function(options) {
     this.enables = null;
     this.name = null;
+    this.targetExt = null; // 设置此 task 生成的文件的后缀名，如果没有，则生成的 dist 文件和原文件的后缀名一致
 
     this.options = options;
 
@@ -35,12 +37,17 @@ module.exports = require('class-extend').extend({
 
     ylog.info.title('initializing task %s', this.name);
 
-    this._getRunnableTasks('init', Object.keys(this.enables), function(task, fn) {
-      this.taskOpts[task] = this.taskOpts[task] || {};
+    // 在 taskOpts 中初始化对应的配置项
+    var enabledTasks = Object.keys(this.enables);
+    _.each(enabledTasks, function(task) { this.taskOpts[task] = this.taskOpts[task] || {}; }, this);
+
+    // 执行 initXxx 脚本
+    this._getRunnableTasks('init', enabledTasks, function(task, fn) {
       fn(this.taskOpts[task]);
-      ylog.silly('initialized task @%s.%s@', this.name, task);
+      ylog.verbose('initialized task @%s.%s@', this.name, task);
     });
 
+    this.initAsyncCompileFn();
     ylog.debug('task @%s@ options', this.name, this.options.tasks[this.name]);
     ylog.ok('initialized task @%s@', this.name);
 
@@ -178,6 +185,88 @@ module.exports = require('class-extend').extend({
   },
 
 
+
+  /**
+   * 得到一个异步处理文件的 task，可以用到 async 中
+   * @param {String} processName
+   * @param {String} file
+   * @param {Function} fn
+   * @param {String} ext
+   * @returns {Function}
+   */
+  getProcessFileTask: function(processName, file, ext, fn) {
+    var self = this;
+
+    return function(done) {
+      ylog.verbose('reading %s file ^%s^', processName, file);
+      fs.readFile(file, function(err, data) {
+        if (err) {
+          done(err);
+        } else {
+          ylog.verbose('processing %s file ^%s^', processName, file);
+
+          // fn 在执行的过程中可能出错
+          try {
+            var dist = self.getDistFile(file, ext),
+              cfg = {src: file, dist: dist};
+            fn.call(self, data.toString(), cfg, function(err, data) {
+              if (err) {
+                done(err);
+              } else {
+                var postCompile = 'post' + _.capitalize(processName) + 'Compile';
+                postCompile = (postCompile in self) ? postCompile : 'postCompile';
+                if (self[postCompile]) {
+                  ylog.verbose('use @%s@ on ^%s^', postCompile, cfg.src);
+                  data = self[postCompile](data, cfg);
+                }
+
+                if (typeof data !== 'string') { return done(err); }
+
+                if (self.minify && self.minifyContent) {
+                  data = self.minifyContent(data, cfg);
+                }
+
+                fs.writeFile(dist, data, function(err) {
+                  if (!err) {
+                    ylog.debug.writeOk('%s write to ^%s^', processName, dist);
+                  }
+                  done(err);
+                });
+              }
+            });
+
+          } catch (e) { done(e); }
+
+        }
+      });
+    };
+  },
+
+  /**
+   * 根据 asyncCompileUnits 中的 key => fn 对，生成
+   * compileXxx 函数
+   *
+   * 必须要指定 this.targetExt
+   */
+  initAsyncCompileFn: function() {
+    _.each(this.asyncCompileUnits, function(fn, key) {
+
+      var protoKey = 'compile' + _.capitalize(key);
+
+      this[protoKey] = function(done) {
+        var tasks = [];
+
+        _.each(this.typedFiles[key], function(f) {
+          tasks.push(this.getProcessFileTask(key, f, this.targetExt, fn.bind(this)));
+        }, this);
+
+        this.async.parallelLimit(tasks, this.options.runLimit, done);
+      }
+
+    }, this);
+  },
+
+
   /**
    * 全局配置放在 options 下
    * 每个 task 的配置可以放在 options.tasks[taskName] 下
@@ -190,6 +279,38 @@ module.exports = require('class-extend').extend({
     return (key in this.taskOpts) ? this.taskOpts[key] : this.options[key];
   },
 
+  _getFile: function(file, ext) {
+    fs.ensureDirSync(path.dirname(file));
+    if (ext) {
+      file = file.replace(/\.\w*$/, '.' + ext);
+    }
+    return file;
+  },
+
+  getTmpFile: function(file, ext) {
+    file = path.join(this.tmp, path.relative(this.src, file));
+    return this._getFile(file, ext);
+  },
+
+  getDistFile: function(file, ext) {
+    file = path.join(this.dist, path.relative(this.src, file.replace(this.tmp, this.src)));
+    return this._getFile(file, ext);
+  },
+
+  _getDir: function(file) {
+    fs.ensureDirSync(file);
+    return file;
+  },
+
+  getTmpDir: function(dir) {
+    dir = path.join(this.tmp, path.relative(this.src, dir));
+    return this._getDir(dir);
+  },
+
+  getDistDir: function(dir) {
+    dir = path.join(this.dist, path.relative(this.src, dir.replace(this.tmp, this.src)));
+    return this._getDir(dir);
+  },
 
   /**
    * 调用系统命令
@@ -200,7 +321,7 @@ module.exports = require('class-extend').extend({
   run: function(cmds, opts, cb) {
     var args = [].concat(cmds);
     [].push.apply(args, dargs(opts.argsOpts, opts.dargs));
-    spawn(args, opts.spawn, cb);
+    return spawn(args, opts.spawn, cb);
   },
 
   async: async,
