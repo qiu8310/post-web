@@ -11,20 +11,21 @@ process.env.YLOG = (process.env.YLOG ? process.env.YLOG + ',' : '') + 'post:web'
 var _ = require('lodash'),
   ylog = require('ylog')('post:web'),
   path = require('path'),
-  async = require('async'),
 
   locate = require('./lib/locate'),
+  Control = require('./task-control'),
   h = require('./helper');
 
 ylog.attributes.time = true;
-ylog.setLevel('debug');
+ylog.setLevel('info');
 ylog.Tag.ns.len = 15;
 ylog.Tag.ns.align = 'right';
 
 
-function postWeb(dir, options) {
+function postWeb(dir, command, options) {
 
   dir = path.resolve(dir);
+
   process.chdir(dir); // 如果目录不存在，这里会抛出异常，就不需要我去控制了
 
   var pkg = h.safeReadJson(dir, 'package.json'),
@@ -40,7 +41,6 @@ function postWeb(dir, options) {
 
   // 初始化配置
   options = require('./options')(dir, options);
-
 
   // 导入项目下常见文件的数据
   _.assign(options, {
@@ -61,30 +61,18 @@ function postWeb(dir, options) {
   // 定位每类文件所在的位置，并将其写入 options
   locate(options);
 
+  // 运行
+  var control = new Control(options);
 
-  //
-  //
-  //switch (options.command) {
-  //  case 'clean':
-  //    compass(options, cbThrow);
-  //    break;
-  //  case 'server':
-  //    break;
-  //  case 'watch':
-  //    break;
-  //  default :
-  //    async.series( wrapTasks([compass, css, image], options), cbThrow );
-  //    break;
-  //}
-
-  var Task = require('./tasks/task-images');
-  var t = new Task(options);
-  t.compile(function() {
-
-  });
+  if (command in control) {
+    control[command]();
+  } else {
+    ylog.fatal('command @%s@ not found', command);
+    throw new Error('command not found');
+  }
 }
 
-postWeb(process.argv[2] || '.', {assetDir: 't'});
+postWeb(process.argv[2] || '.', process.argv[3] || 'compile', {assetDir: 't'});
 
 
 

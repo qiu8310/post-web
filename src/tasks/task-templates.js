@@ -20,7 +20,7 @@ var htmlMinifier = require('html-minifier').minify,
 
 module.exports = require('./task-base').extend({
 
-  init: function() {
+  xinit: function() {
     this.name = 'templates';
     this.targetExt = 'html';  // asyncCompileUnits 中需要用
 
@@ -38,8 +38,6 @@ module.exports = require('./task-base').extend({
       delete jadeOpts.data;
       this.taskOpts.jade = _.assign({}, data, jadeOpts);
     }
-
-    ylog.debug('jade options', this.taskOpts.jade);
   },
 
   initSlim: function(slimOpts) {
@@ -49,7 +47,6 @@ module.exports = require('./task-base').extend({
       delete slimOpts.data;
       slimOpts.locals = JSON.stringify(data);
     }
-    ylog.debug('slim options', slimOpts);
   },
 
   initHaml: function(hamlOpts) {
@@ -70,8 +67,6 @@ module.exports = require('./task-base').extend({
         hamlOpts.locals = rtn.join(os.EOL);
       }
     }
-
-    ylog.debug('slim options', hamlOpts);
   },
 
   asyncCompileUnits: {
@@ -121,14 +116,7 @@ module.exports = require('./task-base').extend({
 
 
   compile: function(done) {
-    ylog.info.title('compiling task %s', this.name);
-
-    this.runParallel('compile', ['markdown', 'jade', 'slim', 'haml', 'html'], function(err) {
-      if (!err) {
-        ylog.ok('compiled task @%s@', this.name);
-      }
-      done(err);
-    });
+    this.runParallel('compile', ['markdown', 'jade', 'slim', 'haml', 'html'], done);
   }
 
 });

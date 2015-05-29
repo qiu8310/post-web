@@ -24,7 +24,7 @@ var postcss = require('postcss'),
 
 module.exports = require('./task-base').extend({
 
-  init: function() {
+  xinit: function() {
 
     this.name = 'styles';
     this.targetExt = 'css';
@@ -45,7 +45,7 @@ module.exports = require('./task-base').extend({
 
     taskOpts.compass = _.extend(
       {
-        quiet: true,
+        quiet: false,
         relativeAssets: true,
         noLineComments: true
       },
@@ -81,18 +81,14 @@ module.exports = require('./task-base').extend({
     if (options.bowerDirectory) {
       cpsOpts.importPath.push(options.bowerDirectory);
     }
-
-    ylog.debug('compass options', cpsOpts);
   },
 
   initStylus: function(stylusOpts) {
     this.arrayOptionAddItem(stylusOpts, 'include', this.options.bowerDirectory);
-    ylog.debug('stylus options', stylusOpts);
   },
 
   initLess: function(lessOpts) {
     this.arrayOptionAddItem(lessOpts, 'includePath', this.options.bowerDirectory);
-    ylog.debug('less options', lessOpts);
   },
 
   initCss: function() {
@@ -119,8 +115,8 @@ module.exports = require('./task-base').extend({
       // relativeTo: path.dirname(cssFile)
     }, compat, taskOpts.cleancss);
 
-    ylog.debug('cssnext options', taskOpts.cssnext);
-    ylog.debug('cleancss options', taskOpts.cleancss);
+    ylog.info('cssnext options', taskOpts.cssnext);
+    ylog.info('cleancss options', taskOpts.cleancss);
   },
 
   compileCompass: function(done) {
@@ -131,6 +127,7 @@ module.exports = require('./task-base').extend({
     var boot = new CpsBoot(path.resolve(options.projectDir, options.src.styles), cpsOpts);
 
     // 执行 compass 命令
+    ylog.info('@compass@ start compile');
     this.run(
       ['compass', 'compile'],
       { argsOpts: cpsOpts },
@@ -142,7 +139,7 @@ module.exports = require('./task-base').extend({
         // 恢复 bootstrap
         boot.recover();
 
-        if (!err) { ylog.verbose(data); }
+        if (!err) { ylog.info('@compass@ compile output: ').ln(data); }
 
         done(err);
       }
@@ -164,6 +161,7 @@ module.exports = require('./task-base').extend({
     _.each(dirFiles, function(_, dir) {
       var outDir = this.getTmpDir(dir);
       tasks.push(function(done) {
+        ylog.info('@stylus@ start compile ^%s^ directory to ^%s^', dir, outDir);
         this.run(['stylus', dir, '--out', outDir], runOpts, done);
       }.bind(this));
     }, this);
@@ -181,6 +179,7 @@ module.exports = require('./task-base').extend({
     _.each(this.typedFiles.less, function(file) {
       var out = this.getTmpFile(file, 'css');
       tasks.push(function(done) {
+        ylog.info('@lessc@ start compile ^%s^ file to ^%s^', file, out);
         this.run(['lessc', file, out], runOpts, done);
       }.bind(this));
     }, this);
@@ -190,7 +189,7 @@ module.exports = require('./task-base').extend({
 
 
   _processCssFile: function(cssFile) {
-    var options = this.options;
+    var options = this.options, distFile;
     var content = fs.readFileSync(cssFile).toString();
 
     // postcss 的 plugins
@@ -203,19 +202,19 @@ module.exports = require('./task-base').extend({
       plugins.push(function(css) { return cssgrace.postcss(css, {from: cssFile}); });
     }
 
-    ylog.verbose('postcss ^%s^', cssFile);
+    ylog.info('postcss ^%s^', cssFile);
     content = postcss(plugins).process(content).css;
 
     if (this.minify) {
-      ylog.verbose('cleancss ^%s^', cssFile);
+      ylog.info('cleancss ^%s^', cssFile);
       var cleancssOpts = this.taskOpts.cleancss;
       cleancssOpts.relativeTo = path.dirname(cssFile);
       content = new CleanCss(cleancssOpts).minify(content).styles;
     }
 
-    cssFile = this.getDistFile(cssFile);
-    fs.writeFileSync(cssFile, content);
-    ylog.debug.writeOk('write to ^%s^', cssFile);
+    distFile = this.getDistFile(cssFile);
+    fs.writeFileSync(distFile, content);
+    ylog.info('&write& ^%s^', distFile);
   },
 
 
@@ -231,14 +230,11 @@ module.exports = require('./task-base').extend({
 
 
   compile: function(done) {
-    ylog.info.title('compiling task %s', this.name);
 
     fs.ensureDirSync(this.tmp);
     this.runSeriesParallel('compile', [['compass', 'stylus', 'less'], 'css'], function(err) {
       fs.removeSync(this.tmp);
-      if (!err) {
-        ylog.ok('compiled task @%s@', this.name);
-      }
+      ylog.info('emtyp directory ^%s^', this.tmp);
       done(err);
     });
   }

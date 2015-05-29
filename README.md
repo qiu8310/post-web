@@ -19,7 +19,7 @@ NOTE:
 
 * 所有以 _ 开头的文件都会当作 partial，不会编译
 * （要做，因为 compass 会编译）另外 styles 或 scripts 子目录中的文件也不会被编译，它们也被当作 partial
-
+* watch 过程中不要修改原有资源的文件夹名称
 
 ## Usage
 

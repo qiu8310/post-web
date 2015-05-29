@@ -10,25 +10,26 @@ var ylog = require('ylog')('post:images'),
   glob = require('glob'),
   path = require('path'),
   fs = require('fs-extra'),
+  _ = require('lodash'),
   ImageMin = require('imagemin'),
   prettyBytes = require('pretty-bytes');
 
 
 module.exports = require('./task-base').extend({
 
-  init: function() {
+  xinit: function() {
     this.name = 'images';
     this.typedFiles = this.getTypedFiles(['img'], true);
   },
 
   initImg: function() {
-    var imgFiles = this.typedFiles.img;
+    var imgFiles = this.typedFiles.img, imgDir = this.options.src.images;
 
     // 过滤掉 compass 已经生成了 sprite 文件的源文件
     var genImgDir = this.options.tasks.styles.compass.generatedImagesPath;
     if (genImgDir) {
       var genImgFiles = glob.sync('**/*.*', {nodir: true, cwd: genImgDir}).map(function(f) {
-        return f.replace(/-\w+\.\w+$/, ''); // xxx/sp-s84ab2f73b6.png => xxx/sp
+        return path.join(imgDir, f.replace(/-\w+\.\w+$/, '/')); // xxx/sp-s84ab2f73b6.png => xxx/sp
       });
       imgFiles = imgFiles.filter(function(f) {
         return _.all(genImgFiles, function(gf) { return f.indexOf(gf) !== 0; });
@@ -65,7 +66,7 @@ module.exports = require('./task-base').extend({
           try {
             targetStats = fs.statSync(target);
             if (targetStats.mtime > stats.mtime) {
-              ylog.debug('!unchaged! @%s@', target);
+              ylog.info('!unchaged! ^%s^', target);
               return done();
             }
           } catch (e) {}
@@ -88,7 +89,7 @@ module.exports = require('./task-base').extend({
             }
             ylog.info.writeOk('^%s^ *(%s)*', f, msg);
           } else {
-            ylog.info.writeOk('copy &%s& to ^%s^', f, target);
+            ylog.info.writeOk('copy ^%s^ to ^%s^', f, target);
           }
 
           process.nextTick(done);
@@ -107,14 +108,7 @@ module.exports = require('./task-base').extend({
   },
 
   compile: function(done) {
-    ylog.info.title('compiling task %s', this.name);
-
-    this.runParallel('compile', ['img'], function(err) {
-      if (!err) {
-        ylog.ok('compiled task @%s@', this.name);
-      }
-      done(err);
-    });
+    this.runParallel('compile', ['img'], done);
   }
 
 });

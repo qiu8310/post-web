@@ -54,6 +54,25 @@ var options = {
   tmp: {},
   dist: {},
 
+  metas: {
+    styles: {
+      types: ['compass', 'stylus', 'less', 'css'],
+      finalExtension: 'css'
+    },
+    scripts: {
+      types: ['babel', 'coffee', 'typescript', 'iced', 'js'],
+      finalExtension: 'js'
+    },
+    templates: {
+      types: ['markdown', 'jade', 'slim', 'haml', 'html'],
+      finalExtension: 'html'
+    },
+    images: {
+      types: ['img']
+    },
+    fonts: {}
+  },
+
   tasks: {
     styles: {
       compass: {
@@ -67,6 +86,11 @@ var options = {
       cssnext: {}
     },
     scripts: {
+      uglify: {
+        warnings: true,
+        mangle: true,
+        compress: {}
+      },
       babel: { ast: false },
       coffee: {},
       typescript: {
@@ -112,33 +136,6 @@ var options = {
     },
     fonts: {}
   }
-
-  /*
-  compass: {
-    command: 'compile',
-    require: []
-  },
-  css: {
-
-  },
-  cssnext: {
-
-  },
-  cleanCss: {
-
-  },
-  image: {
-    // compass 自动将指定文件夹中的所有图片生成一个 sprite 文件，
-    // 如果此选项是 true，则会忽略这些有生成 sprite 文件的文件夹中的所有图片文件
-    ignoreSpriteSrc: true
-  },
-  // imagemin 的配置选项
-  imagemin: {
-    interlaced: true,
-    progressive: true,
-    optimizationLevel: 3
-  }
-  */
 };
 
 

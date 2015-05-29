@@ -21,7 +21,7 @@ function getIgnoresFromLocateBaseDir(locateBaseDir, options) {
   var ignores = _.map(options.excludeDirs.concat(options.distDir), function(dir) {
     return path.relative(locateBaseDir, path.join(dir, '**'));
   });
-  ylog.silly('locating directories exclude those file patterns ^%o^', ignores);
+  ylog.verbose('locating directories exclude those file patterns ^%o^', ignores);
   return ignores;
 }
 
@@ -41,13 +41,16 @@ module.exports = function(options) {
     distDir = options.distDir,
     projectDir = options.projectDir;
 
+  ylog.line();
+  ylog.info.title('locating asset directory');
+
   // 保存各类文件所在的目录
   var locateBaseDir = assetDir || '.'; // . 表示的是 projectDir，因为默认的 projectDir 是 absolute path
 
   var ignores = getIgnoresFromLocateBaseDir(locateBaseDir, options), foundAny;
 
   _.each(cfg, function(exts, key) {
-    ylog.debug('locating @%s@ directory by searching file extensions ^%o^', key, exts);
+    ylog.verbose('locating @%s@ directory by searching file extensions ^%o^', key, exts);
     var locatedDirs = locatePatternDirs('**/[^_]*.' + h.getGlobPatternFromList(cfg[key]), locateBaseDir, ignores);
 
     switch (locatedDirs.length) {
@@ -91,8 +94,8 @@ module.exports = function(options) {
     throw new Error('located no files');
   }
 
-  ylog.ok('src directory:', options.src);
-  ylog.ok('dist directory:', options.dist);
+  ylog.verbose.writeFlag(options.src, 'Src directory');
+  ylog.verbose.writeFlag(options.dist, 'Dist directory');
 
 
   // 清空 distDir （清空后图片得重新压缩，太慢了，所以只有在发布的时候才清空）

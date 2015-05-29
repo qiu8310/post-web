@@ -17,49 +17,92 @@ var _ = require('lodash'),
 
 module.exports = require('class-extend').extend({
 
-  constructor: function(options) {
-    this.enables = null;
-    this.name = null;
-    this.targetExt = null; // 设置此 task 生成的文件的后缀名，如果没有，则生成的 dist 文件和原文件的后缀名一致
+  constructor: function(name, options) {
 
+    this.name = name;
     this.options = options;
 
-    this.init();
+    this.meta = options.metas[name];
+    this.taskOpts = options.tasks[name];
 
-    this.taskOpts = options.tasks[this.name];
-    this.src = options.src[this.name];
-    this.dist = options.dist[this.name];
-    this.tmp = options.tmp[this.name];
+    this.src = options.src[name];
+    this.dist = options.dist[name];
+    this.tmp = options.tmp[name];
     this.minify = this.attr('minify');
 
-    this.taskOpts.enables = this.enables;
+
+    // 得到本 task 中每类文件的后缀名 到文件类型的映射
+    var extensionToType = this.extensionToType = {};
+    var extensions = this.extensions = [];
+    _.each(this.meta.types, function(type) {
+
+      // 防止用户没有配置此项
+      this.taskOpts[type] = this.taskOpts[type] || {};
+
+      _.each(this.getFileTypeExtensions(type), function(ext) {
+        extensions.push(ext);
+        extensionToType[ext] = type;
+      });
+    }, this);
 
 
-    ylog.info.title('initializing task %s', this.name);
+    // 执行子类的 init 方法
+    if ('init' in this) { this.init(); }
+
+    // 根据 asyncCompileUnits 生成 compileXxx 函数
+    this.initAsyncCompileFn();
+
+    ylog.silly(this);
+  },
+
+  compile: function() {
+
+    // 每次文件变化都要执行此函数，重新定位文件（目录结构变化了就没办法了）
+    this.locate();
+
+    // 方便其它 task 判断当前 task 运行了哪些任务
+    //this.taskOpts.enables = this.enables;
+
 
     // 在 taskOpts 中初始化对应的配置项
     var enabledTasks = Object.keys(this.enables);
-    _.each(enabledTasks, function(task) { this.taskOpts[task] = this.taskOpts[task] || {}; }, this);
+    ylog.info.writeFlag(this.enables, 'Exist file types');
 
     // 执行 initXxx 脚本
     this._getRunnableTasks('init', enabledTasks, function(task, fn) {
       fn(this.taskOpts[task]);
-      ylog.verbose('initialized task @%s.%s@', this.name, task);
+      ylog.verbose('get @%s.%s@ options', this.name, task, this.taskOpts[task]);
+      ylog.verbose('end run @%s.init%s@', this.name, _.capitalize(task));
     });
 
-    this.initAsyncCompileFn();
-    ylog.debug('task @%s@ options', this.name, this.options.tasks[this.name]);
+
+    ylog.silly('task @%s@ options', this.name, this.taskOpts);
     ylog.ok('initialized task @%s@', this.name);
 
   },
 
+
+  /**
+   * 给 util.inspect 用的，另外 ylog 调用了 util.inspect
+   * @returns {{}}
+   */
+  inspect: function() {
+    var rtn = {};
+    Object.keys(this).forEach(function(key) {
+      var val = this[key];
+      if (key !== 'options' && typeof val !== 'function') {
+        rtn[key] = val;
+      }
+    }.bind(this));
+    return rtn;
+  },
 
   _getRunnableTask: function(key, task) {
     if (this.enables[task]) {
       var fnName = key + _.capitalize(task);
       if (this[fnName]) {
         return function() {
-          ylog.info('run @%s.%s@', this.name, fnName);
+          ylog.verbose('run @%s.%s@', this.name, fnName);
           this[fnName].apply(this, arguments);
         }.bind(this);
       }
@@ -141,37 +184,34 @@ module.exports = require('class-extend').extend({
 
 
   /**
-   * 解析文件的类型，得到在对应 src directory 中的所有这些类型的文件，同时根据文件类型设置 enables 属性
-   * @param {Array} fileTypes
-   * @param {boolean} deep - 是否遍历子文件夹
-   * @returns {*}
+   * 根据文件得到文件的类型
+   * @param {String} file
+   * @returns {String|Boolean}
    */
-  getTypedFiles: function(fileTypes, deep) {
-    var exts = [], enables = {}, extMap = {};
+  fileType: function(file) {
+    var ext = h.ext(file);
+    return ext ? this.extensionToType[ext] : false;
+  },
 
-    _.each(fileTypes, function(fileType) {
-      extMap[fileType] = this.getFileTypeExtensions(fileType);
-      [].push.apply(exts, extMap[fileType]);
-    }, this);
-
-    var files = h.findFilesByExtensions(this.options.src[this.name], _.uniq(exts), deep);
+  /**
+   * 定位当前 task 中的所有文件，并将它们按类型分类，保存到 typedFiles
+   */
+  locate: function() {
+    var files = h.findFilesByExtensions(this.src, this.extensions, true);
     var typedFiles = {};
+    var enables = {};
 
-    _.each(files, function(f) {
-      var ext = h.ext(f);
-      var type = _.find(fileTypes, function(t) {
-        return _.includes(extMap[t], ext);
-      });
+    _.each(files, function(file) {
+      var type = this.fileType(file);
       if (type) {
         typedFiles[type] = typedFiles[type] || [];
-        typedFiles[type].push(f);
+        typedFiles[type].push(file);
         enables[type] = true;
       }
-    });
+    }, this);
 
     this.enables = enables;
-
-    return typedFiles;
+    this.typedFiles = typedFiles;
   },
 
   /**
@@ -183,7 +223,6 @@ module.exports = require('class-extend').extend({
     var exts = this.options.extensions;
     return fileType in exts ? exts[fileType] : [fileType];
   },
-
 
 
   /**
@@ -209,6 +248,7 @@ module.exports = require('class-extend').extend({
           try {
             var dist = self.getDistFile(file, ext),
               cfg = {src: file, dist: dist};
+            ylog.debug('start compile ^%s^ to ^%s^', file, dist);
             fn.call(self, data.toString(), cfg, function(err, data) {
               if (err) {
                 done(err);
@@ -223,12 +263,13 @@ module.exports = require('class-extend').extend({
                 if (typeof data !== 'string') { return done(err); }
 
                 if (self.minify && self.minifyContent) {
+                  ylog.info('minify ^%s^', cfg.dist);
                   data = self.minifyContent(data, cfg);
                 }
 
                 fs.writeFile(dist, data, function(err) {
                   if (!err) {
-                    ylog.debug.writeOk('%s write to ^%s^', processName, dist);
+                    ylog.info('&write& ^%s^', dist);
                   }
                   done(err);
                 });
@@ -246,7 +287,8 @@ module.exports = require('class-extend').extend({
    * 根据 asyncCompileUnits 中的 key => fn 对，生成
    * compileXxx 函数
    *
-   * 必须要指定 this.targetExt
+   * 须要指定 this.meta.finalExtension
+   * 如果没有，则生成的 dist 文件和原文件的后缀名一致
    */
   initAsyncCompileFn: function() {
     _.each(this.asyncCompileUnits, function(fn, key) {
@@ -257,7 +299,7 @@ module.exports = require('class-extend').extend({
         var tasks = [];
 
         _.each(this.typedFiles[key], function(f) {
-          tasks.push(this.getProcessFileTask(key, f, this.targetExt, fn.bind(this)));
+          tasks.push(this.getProcessFileTask(key, f, this.meta.finalExtension, fn.bind(this)));
         }, this);
 
         this.async.parallelLimit(tasks, this.options.runLimit, done);
@@ -265,6 +307,8 @@ module.exports = require('class-extend').extend({
 
     }, this);
   },
+
+
 
 
   /**

@@ -6,12 +6,13 @@
  * Licensed under the MIT license.
  */
 
-var ylog = require('ylog')('post:scripts');
+var ylog = require('ylog')('post:scripts'),
+  UglifyJS = require('uglify-js');
 
 
 module.exports = require('./task-base').extend({
 
-  init: function() {
+  xinit: function() {
     this.name = 'scripts';
     this.targetExt = 'js';  // asyncCompileUnits 中需要用
 
@@ -19,6 +20,8 @@ module.exports = require('./task-base').extend({
 
     // 查看有没有 sass, less, stylus, css，此函数同时会设置 this.enables 属性
     this.typedFiles = this.getTypedFiles(types, true);
+
+    this.options.tasks.scripts.uglify.fromString = true;
   },
 
 
@@ -53,21 +56,14 @@ module.exports = require('./task-base').extend({
   },
 
 
-  minifyContent: function(content) {
-    // @TODO
-    return content;
+  /* jshint ignore:start */
+  minifyContent: function(content, cfg) {
+    return UglifyJS.minify(content, this.taskOpts.uglify).code;
   },
-
+  /* jshint ignore:end */
 
   compile: function(done) {
-    ylog.info.title('compiling task %s', this.name);
-
-    this.runParallel('compile', ['js', 'babel', 'coffee', 'iced', 'typescript'], function(err) {
-      if (!err) {
-        ylog.ok('compiled task @%s@', this.name);
-      }
-      done(err);
-    });
+    this.runParallel('compile', ['js', 'babel', 'coffee', 'iced', 'typescript'], done);
   }
 
 });
