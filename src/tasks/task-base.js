@@ -13,6 +13,7 @@ var _ = require('lodash'),
   spawn = require('../lib/spawn'),
   h = require('../helper'),
   dargs = require('../lib/dargs'),
+  prettyBytes = require('pretty-bytes'),
   ylog = require('ylog')('post:base');
 
 module.exports = require('class-extend').extend({
@@ -228,6 +229,82 @@ module.exports = require('class-extend').extend({
     return fileType in exts ? exts[fileType] : [fileType];
   },
 
+  /**
+   * 批量压缩资源的封装器，主要用在不需要编译，只需要压缩的 images/fonts 上面
+   * @param {String} type - 文件类型
+   * @param {Array} [files] - 不要从 type 中取文件，用此指定的文件
+   * @param {Function} process
+   * @param {Function} done
+   */
+  batchMinProcess: function(type, files, process, done) {
+    var self = this;
+    var totalSaved = 0, filesCount = 0;
+
+    if (_.isFunction(files)) {
+      done = process;
+      process = files;
+      files = false;
+    }
+
+    this.async.forEachLimit(
+      files || this.typedFiles[type],
+      this.options.runLimit,
+      function(src, done) {
+        var dist = self.getDistFile(src);
+
+        self.async.map([src, dist], fs.stat, function(err, result) {
+          var srcStats = result[0], distStats = result[1];
+          if (!srcStats) { done(err); }
+          if (distStats && distStats.mtime > srcStats.mtime) {
+            ylog.verbose('!unchaged! ^%s^', dist);
+            return done();
+          }
+
+          // 可能没有 dist 文件，或者 src 比 dist 新，启动压缩了
+          if (self.minify) {
+            process.call(self, src, dist, function(err, data) {
+              if (!err) {
+                filesCount++;
+                var msg;
+                var origSize = srcStats.size;
+                var diffSize = origSize - data.length;
+
+                totalSaved += diffSize;
+                if (diffSize < 10) {
+                  msg = 'already optimized';
+                } else {
+                  msg = 'saved ' + prettyBytes(diffSize) + ' - ' + (diffSize / origSize * 100).toFixed() + '%';
+                }
+                ylog.info.writeOk('^%s^ *(%s)*', dist, msg);
+              }
+              done(err);
+            });
+          } else {
+            fs.readFile(src, function(err, data) {
+              if (err) { return done(err); }
+              fs.writeFile(dist, data.toString(), function() {
+                if (err) { return done(err); }
+                ylog.info.writeOk('copy ^%s^ to ^%s^', src, dist);
+              });
+            });
+            done();
+          }
+        });
+      },
+      function(err) {
+        if (filesCount > 0) {
+          ylog.ok('@%smin@ minified %d %s%s (saved %s)',
+            type,
+            filesCount,
+            type,
+            filesCount > 1 ? 's' : '',
+            prettyBytes(totalSaved));
+        }
+        done(err);
+      }
+    );
+  },
+
 
   /**
    * 得到一个异步处理文件的 task，可以用到 async 中
@@ -286,6 +363,7 @@ module.exports = require('class-extend').extend({
       });
     };
   },
+
 
   /**
    * 根据 asyncCompileUnits 中的 key => fn 对，生成

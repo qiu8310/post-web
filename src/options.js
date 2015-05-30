@@ -15,7 +15,11 @@ var options = {
   assetDir: null,
   distDir: 'dist',
 
-  server: function(app, serverOpts, globalOpts) {},
+  server: function(app, serverOpts, globalOpts) {
+    // this === express
+    // 并且添加了 modRewrite 到 this 变量中
+    // app.use(this.modRewrite([ '^/static/(.*) /$1' ]));
+  },
 
   excludeDirs: [], // 需要排除的一些文件夹，如果没有指定 assetDir，程序会自动确认 assetDir，但判断过程可能会受其它目录干扰
 
@@ -49,7 +53,7 @@ var options = {
     babel: ['jsx', 'es6'],
     iced: ['iced'],
     typescript: ['ts'],
-    img: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+    image: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
     font: ['eot', 'ttf', 'woff', 'woff2', 'svg']
   },
 
@@ -71,9 +75,11 @@ var options = {
       finalExtension: 'html'
     },
     images: {
-      types: ['img']
+      types: ['image']
     },
-    fonts: {}
+    fonts: {
+      types: ['font']
+    }
   },
 
   tasks: {

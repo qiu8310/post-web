@@ -43,7 +43,7 @@ var helper = {
   getGlobPatternFromList: function(arr) {
     switch (arr.length) {
       case 0:
-        return '';
+        return '*';
       case 1:
         return arr[0];
       default:
@@ -51,19 +51,19 @@ var helper = {
     }
   },
 
-  findFilesByPattern: function(pattern) {
+  findFilesByPattern: function(pattern, ignore) {
     return glob.sync(pattern, {
       dot: false,
       nocase: true,
       nosort: true,
       nodir: true,
-      ignore: []
+      ignore: [].concat(ignore || [])
     });
   },
 
-  findFilesByExtensions: function(dir, extensions, deep) {
+  findFilesByExtensions: function(dir, extensions, deep, ignore) {
     var pattern = path.join(dir, (deep ? '**/' : '') + '[!_]*.');
-    return this.findFilesByPattern(pattern + this.getGlobPatternFromList(extensions));
+    return this.findFilesByPattern(pattern + this.getGlobPatternFromList(extensions), ignore);
   },
 
   /**

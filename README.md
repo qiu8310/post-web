@@ -1,31 +1,46 @@
 # post-web
 [![NPM version](https://badge.fury.io/js/post-web.svg)](https://npmjs.org/package/post-web)
 [![GitHub version][git-tag-image]][project-url]
+[![Dependency Status][daviddm-url]][daviddm-image] <!--
 [![Build Status][travis-image]][travis-url]
-[![Dependency Status][daviddm-url]][daviddm-image]
 [![Code Climate][climate-image]][climate-url]
-[![Coverage Status][coveralls-image]][coveralls-url]
+[![Coverage Status][coveralls-image]][coveralls-url] -->
 
 
-在项目根目录上运行 `post-web`，自动分析文件结构，同时：
+__在项目根目录上运行 `pweb`，自动分析文件结构，同时：__
 
-- 将 sass 编译成 css，编译 sass ，同时会使用我预定义好的一些非常有用的 mixin，
-- 将 coffee、dart、type、es6 相关的 JS 编译成 es5 版的 js
-- 将 图片压缩
-- 将 slim、jade 编译成 html
+- 将 sass/stylus/less 编译成 css，同时支持 cssnext, autoprefixer 等，
+- 将 coffee/jsx/es6/typescript 编译成 js
+- 将 slim/jade/haml/md 编译成 html
+- 支持 watch 源代码，有改动可以触发上面的对应的编译程序
+- 支持 图片/字体/代码 的压缩
+- 支持 字体文件自动根据 ttf 字体生成其它三类的字体：eot, svg 和 woff
+- 支持启动 express 服务器，并启动 livereload（自动分配可以用的端口，一般不会出现端口被占用的情况）
+- 支持在项目目录下设置 `{pweb,postweb,post-web}rc.{json,js,}` pattern 的配置文件（可以配置哪些选项可以查看[options.js](./src/options.js)）
+<!-- - 支持 将 ttf 字体生成 css：主要作用是生成 iconfont -->
 
 
-TODO
+__缺点：__
+
+- 不支持打包（可以考虑用 grunt 或 gulp 打包 post-web 生成后的代码）
+- 不支持具体业务逻辑的处理（同样具体业务逻辑可以考虑处理 post-web 生成后的代码）
+
+
+__NOTE:__
+
+* 所有以 _ 开头的文件都会当作 partial，不会编译
+* watch 过程中不要修改原有资源的文件夹名称
+* 除了 scripts/styles/templates/images/fonts 之外的其它文件（如 .txt），只有在 production 环境下才会拷贝到 distDir
+
+
+__TODO:__
  
 * 添加 lint
 * 添加编译某些应用
 * 添加 hash
+* 完善我的 sass 库
 
-NOTE:
 
-* 所有以 _ 开头的文件都会当作 partial，不会编译
-* （要做，因为 compass 会编译）另外 styles 或 scripts 子目录中的文件也不会被编译，它们也被当作 partial
-* watch 过程中不要修改原有资源的文件夹名称
 
 ## Usage
 
@@ -35,14 +50,22 @@ NOTE:
 npm i -g post-web
 ```
 
-### 使用 `pweb` 或 `postweb` 命令
+### 使用 `pweb` 或 `pwebs` 命令
 
 
 ```bash
 
-pweb [options] [directory]
+pweb [options] [directory] # directory 是项目的根目录
 
 pweb --help # 查看帮助
+
+
+```
+
+```bash
+
+pwebs [options] [directories...]  # directory 是你的服务器要监听的静态资源的文件夹
+
 
 ```
 
@@ -143,26 +166,6 @@ a {
 clean-css 定义了很多优化 css 规则，如果发现你的样式在低版本上不 work 了，可能是 clean-css 帮你优化了。
 详情可以去它 [github 主页](https://github.com/jakubpawlowicz/clean-css) 上看它有哪些优化的选项
 
-
-
-
-## Image 处理流
-
-### [imagemin](https://github.com/imagemin/imagemin)
-
-
-## HTML 处理流
-
-- [haml](http://haml.info/docs/yardoc/file.REFERENCE.html): 使用系统的 haml 命令
-- [slim](http://www.rubydoc.info/gems/slim/frames): 使用系统的 slim 命令
-markdown, slim, haml, jade, ejs
-
-
-## JS 处理流
-
-coffee, liveScript, typeScript, dart, atScript
-
-jsx, cjsx (coffee jsx)
 
 
 

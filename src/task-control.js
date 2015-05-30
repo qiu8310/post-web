@@ -7,8 +7,10 @@
  */
 var ylog = require('ylog')('post:control'),
   _ = require('lodash'),
+  h = require('./helper'),
   async = require('async'),
   path = require('path'),
+  fs = require('fs-extra'),
   watch = require('./lib/watch');
 
 var EventEmitter = require('events').EventEmitter,
@@ -28,7 +30,6 @@ function TaskControl(options) {
 
   var enabledTaskNames = Object.keys(options.dist)
     .sort(function(a, b) { return orders[b] - orders[a]; });
-
 
   var tasks = [];
 
@@ -76,8 +77,38 @@ _.assign(TaskControl.prototype, {
           task.compileWrap(done);
         }
       },
-      done
+      function(err) {
+        if (!err) {
+          this.transformOtherFiles();
+        }
+        done(err);
+      }.bind(this)
     );
+  },
+
+  /**
+   * 当 environment = production 时
+   * 移动除了几个 tasks 之外的其它文件到 dist 目录中去
+   */
+  transformOtherFiles: function() {
+    if (this.options.environment === 'production') {
+      var assetDir = this.options.assetDir, distDir = this.options.distDir;
+
+      var allFiles = h.findFilesByExtensions(assetDir, [], true, '**/*.require');
+      var allTaskFiles = _.reduce(this.tasks, function(sum, task) {
+        _.each(task.typedFiles, function(files) {
+          sum.push.apply(sum, files);
+        });
+        return sum;
+      }, []);
+
+      ylog.info.ln.title('process other type files');
+      _.difference(allFiles, allTaskFiles).forEach(function(file) {
+        var distFile = path.join(distDir, path.relative(assetDir, file));
+        fs.writeFileSync(distFile, h.readFile(file));
+        ylog.info.log('&write& ^%s^', distFile);
+      });
+    }
   },
 
   /**

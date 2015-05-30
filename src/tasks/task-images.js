@@ -6,24 +6,17 @@
  * Licensed under the MIT license.
  */
 
-var ylog = require('ylog')('post:images'),
-  glob = require('glob'),
+var glob = require('glob'),
   path = require('path'),
-  fs = require('fs-extra'),
   _ = require('lodash'),
-  ImageMin = require('imagemin'),
-  prettyBytes = require('pretty-bytes');
+  ImageMin = require('imagemin');
 
 
 module.exports = require('./task-base').extend({
 
-  init: function() {
-    //this.after = [ 'styles' ]; // 要在 styles 之后执行
-  },
-
   // 这个不能设置成 initImg，因为它和文件有关，文件都是在变化的
-  beforeCompileImg: function() {
-    var imgFiles = this.typedFiles.img, imgDir = this.options.src.images;
+  beforeCompileImage: function() {
+    var imageFiles = this.typedFiles.image, imgDir = this.options.src.images;
 
     // 过滤掉 compass 已经生成了 sprite 文件的源文件
     var genImgDir = this.options.tasks.styles.compass.generatedImagesPath;
@@ -31,86 +24,38 @@ module.exports = require('./task-base').extend({
       var genImgFiles = glob.sync('**/*.*', {nodir: true, cwd: genImgDir}).map(function(f) {
         return path.join(imgDir, f.replace(/-\w+\.\w+$/, '/')); // xxx/sp-s84ab2f73b6.png => xxx/sp
       });
-      imgFiles = imgFiles.filter(function(f) {
+
+      imageFiles = imageFiles.filter(function(f) {
         return _.all(genImgFiles, function(gf) { return f.indexOf(gf) !== 0; });
       });
     }
 
-    this.imgFiles = imgFiles;
+    this.imageFiles = imageFiles;
   },
 
-  compileImg: function(done) {
+  compileImage: function(done) {
+    this.beforeCompileImage();
+    var imgMinOpts = this.taskOpts.imagemin;
 
-    this.beforeCompileImg();
-
-    var totalSaved = 0, filesCount = 0,
-      self = this, imgMinOpts = this.taskOpts.imagemin;
-
-    this.async.forEachLimit(this.imgFiles, this.options.runLimit, function(f, done) {
-      var target = self.getDistFile(f),
-        targetStats;
-
+    this.batchMinProcess('image', this.imageFiles, function(src, dist, cb) {
       var min = new ImageMin()
-        .src(f)
-        .dest(path.dirname(target));
+        .src(src)
+        .dest(path.dirname(dist));
 
-      if (self.minify) {
-        min.use(ImageMin.jpegtran(imgMinOpts))
-          .use(ImageMin.gifsicle(imgMinOpts))
-          .use(ImageMin.optipng(imgMinOpts))
-          .use(ImageMin.svgo(imgMinOpts));
-      }
+      // 如果不传任何 use， ImageMin 默认就使用下面四种 plugin，但为了给它传参数，咱们还是加上吧
+      min.use(ImageMin.jpegtran(imgMinOpts))
+        .use(ImageMin.gifsicle(imgMinOpts))
+        .use(ImageMin.optipng(imgMinOpts))
+        .use(ImageMin.svgo(imgMinOpts));
 
-
-      fs.stat(f, function (err, stats) {
-        if (err) { return done(err); }
-
-        try {
-          targetStats = fs.statSync(target);
-          if (targetStats.mtime > stats.mtime) {
-            ylog.verbose('!unchaged! ^%s^', target);
-            return done();
-          }
-        } catch (e) {}
-
-
-        min.run(function(err, data) {
-          if (err) { return done(err); }
-
-          if (self.minify) {
-            filesCount++;
-            var msg;
-            var origSize = stats.size;
-            var diffSize = origSize - data[0].contents.length;
-
-            totalSaved += diffSize;
-            if (diffSize < 10) {
-              msg = 'already optimized';
-            } else {
-              msg = 'saved ' + prettyBytes(diffSize) + ' - ' + (diffSize / origSize * 100).toFixed() + '%';
-            }
-            ylog.info.writeOk('^%s^ *(%s)*', f, msg);
-          } else {
-            ylog.info.writeOk('copy ^%s^ to ^%s^', f, target);
-          }
-
-          process.nextTick(done);
-        });
+      min.run(function(err, files) {
+        cb(err, files && files[0] && files[0].contents);
       });
-
-    }, function (err) {
-
-      if (filesCount > 0) {
-        ylog.ok('@imagemin@ minified %d image%s (saved %s)',
-          filesCount, filesCount > 1 ? 's' : '', prettyBytes(totalSaved));
-      }
-
-      done(err);
-    });
+    }, done);
   },
 
   compile: function(done) {
-    this.runParallel('compile', ['img'], done);
+    this.runParallel('compile', ['image'], done);
   }
 
 });
