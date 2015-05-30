@@ -66,8 +66,12 @@ function app(options, cb) {
       }
       options.port = result[0];
       options.livereload = result[1];
-    });
 
+      start(options, cb);
+    });
+}
+
+function start(options, cb) {
 
   var outputHost = options.host === '0.0.0.0' ? 'localhost' : options.host;
 
@@ -125,7 +129,7 @@ function app(options, cb) {
           options.port === 80 ? '' : ':' + options.port
         );
       }
-  });
+    });
 }
 
 module.exports = app;

@@ -12,6 +12,8 @@ var path = require('path'),
 
 var ylog = require('ylog')('post:watch');
 
+var ignores = [];
+
 /**
  * 监听 dir 中的文件的变化
  *
@@ -33,7 +35,7 @@ function watch (dir, opts, cb) {
 
 
   var files = [],
-
+    dotFileRe = /(^|\\|\/)\.\w/,
     handler = _.debounce(function() {
       cb(files);
       files.length = 0; // 清空数组
@@ -42,10 +44,20 @@ function watch (dir, opts, cb) {
   gaze(gazePattern, opts, function(err) {
 
     // On changed/added/deleted
-    this.on('all', function(event, filepath) {
-      files.push([event, filepath]);
-      ylog.debug('&%s& ^%s^', event, filepath);
-      handler();
+    this.on('all', function(event, file) {
+
+      // 只有第一次忽略，第二次再过来就不忽略了
+      if (_.includes(ignores, file)) {
+        return ignores.splice(ignores.indexOf(file), 1);
+      }
+
+      // dot 开头的文件不需要监听
+      if (!dotFileRe.test(file)) {
+        files.push([event, file]);
+        var md = event === 'changed' ? '&' : (event === 'added' ? '**' : '#');
+        ylog.info('%s%s%s ^%s^', md, event, md, file);
+        handler();
+      }
     });
 
     // 处理错误
@@ -53,5 +65,11 @@ function watch (dir, opts, cb) {
     if (err) { ylog.error(err); }
   });
 }
+
+watch.addIgnoreFile = function (file) {
+  if (!_.includes(ignores, file)) {
+    ignores.push(file);
+  }
+};
 
 module.exports = watch;

@@ -12,7 +12,7 @@ var fs = require('fs-extra'),
   _ = require('lodash');
 
 var helper = require('./../helper');
-
+var watch = require('./watch');
 
 var startTag = '// BOOTSTRAP START',
   endTag = '// BOOTSTRAP END',
@@ -68,23 +68,26 @@ function Bootstrap(sassDir, options) {
 
   this.sassFiles = _.map(sassFiles, function(file) {
     var isSass = /\.sass$/.test(file);
-    var content = helper.readFile(file), trippedContent, newContent;
+    var content, newContent, trippedContent;
     var base = path.basename(file).replace(/\.\w*$/, '');
 
     // 找到是否有和它重名的 .require 文件
     var reqFile = glob.sync(root + '/' + base + '.require', reqGlobOpts).shift() || commonRequire;
 
-    trippedContent = newContent = removeBootBlock(content);
-
     if (reqFile) {
-      newContent = addBootBlock(newContent, getImports(reqFile, isSass, options.importPath));
+      content = helper.readFile(file);
+
+      trippedContent = removeBootBlock(content);
+      newContent = addBootBlock(trippedContent, getImports(reqFile, isSass, options.importPath));
+
+      if (newContent !== content) {
+        watch.addIgnoreFile(path.resolve(file));
+        fs.writeFileSync(file, newContent);
+        return {path: file, content: trippedContent};
+      }
     }
 
-    if (newContent !== content) {
-      fs.writeFileSync(file, newContent);
-    }
-
-    return {path: file, content: trippedContent};
+    return false;
   });
 }
 
@@ -94,7 +97,10 @@ function Bootstrap(sassDir, options) {
  */
 Bootstrap.prototype.recover = function() {
   this.sassFiles.forEach(function(file) {
-    fs.writeFileSync(file.path, file.content);
+    if (file) {
+      watch.addIgnoreFile(path.resolve(file.path));
+      fs.writeFileSync(file.path, file.content);
+    }
   });
 };
 

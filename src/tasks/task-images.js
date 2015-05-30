@@ -17,12 +17,12 @@ var ylog = require('ylog')('post:images'),
 
 module.exports = require('./task-base').extend({
 
-  xinit: function() {
-    this.name = 'images';
-    this.typedFiles = this.getTypedFiles(['img'], true);
+  init: function() {
+    //this.after = [ 'styles' ]; // 要在 styles 之后执行
   },
 
-  initImg: function() {
+  // 这个不能设置成 initImg，因为它和文件有关，文件都是在变化的
+  beforeCompileImg: function() {
     var imgFiles = this.typedFiles.img, imgDir = this.options.src.images;
 
     // 过滤掉 compass 已经生成了 sprite 文件的源文件
@@ -40,6 +40,9 @@ module.exports = require('./task-base').extend({
   },
 
   compileImg: function(done) {
+
+    this.beforeCompileImg();
+
     var totalSaved = 0, filesCount = 0,
       self = this, imgMinOpts = this.taskOpts.imagemin;
 
@@ -62,15 +65,14 @@ module.exports = require('./task-base').extend({
       fs.stat(f, function (err, stats) {
         if (err) { return done(err); }
 
-        if (!self.minify) {
-          try {
-            targetStats = fs.statSync(target);
-            if (targetStats.mtime > stats.mtime) {
-              ylog.info('!unchaged! ^%s^', target);
-              return done();
-            }
-          } catch (e) {}
-        }
+        try {
+          targetStats = fs.statSync(target);
+          if (targetStats.mtime > stats.mtime) {
+            ylog.verbose('!unchaged! ^%s^', target);
+            return done();
+          }
+        } catch (e) {}
+
 
         min.run(function(err, data) {
           if (err) { return done(err); }

@@ -1,0 +1,327 @@
+@import "bootstrap";
+
+//@import "mixin/bootstrap";
+//@import "ui/bootstrap";
+//@import "ui/reset";
+//@import "ui/layout";
+//@import "ui/colors";
+//@import "ui/btn";
+//@import "ui/debug";
+
+
+html, body { background: #ececec; }
+.gap { padding-left: 16px; padding-right: 16px; }
+.container, header { width: 320px; margin: 0 auto; }
+.container {  min-height: 450px; }
+@media only screen and (max-width: 450px) {
+  .container, header { width: 100%; }
+}
+
+header {
+  position: relative;
+  .back {
+    position: absolute;
+    z-index: 499;
+    @include size(38px);
+
+    &::after {
+      content: '';
+      @include position(absolute, 0);
+      margin: auto;
+      @include sprite-2x(back, true, 'course/sp');
+    }
+  }
+}
+
+.btn {
+  font-size: 21px;
+  font-weight: 700;
+  text-align: center;
+  color: white;
+  background-color: map-get($colors, p3);
+  @include size(100% 48px 49px, block);
+  box-shadow: 0 2px rgba(0, 0, 0, .16);
+}
+.btn-light { background-color: map-get($colors, p2); }
+.btn.disabled { background-color: #dedede; color: white; }
+
+.i-success { @include sprite-2x(success, block, 'course/sp'); }
+.i-failed { @include sprite-2x(failed, block, 'course/sp'); }
+.i-success, .i-failed {
+  margin: 0 auto 22px auto;
+}
+.modal {
+  width: 288px;
+  padding: 35px 29px 28px;
+  background-color: white;
+
+  .content {
+    color: map-get($colors, p1);
+    font-size: 16px;
+    text-align: center;
+    line-height: 20px;
+  }
+  .control {
+    margin-top: 35px;
+    display: flex;
+    .btn { flex: 1; }
+    .btn:last-child { margin-left: 9px; background-color: map-get($colors, o1); }
+    .btn:first-child { margin-right: 9px; background-color: map-get($colors, p2); }
+    .btn:first-child:last-child { margin: 0; }
+  }
+}
+
+.toast {
+  @include size(188px 89px true);
+  background-color: #ececec;
+  color: #9196a6;
+  font-size: 16px;
+  text-align: center;
+}
+
+.footer-btn, footer::after {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+footer {
+  position: relative;
+  $h: image-height-ratio('course/btm', .5);
+  width: 100%;
+  height: $h + 64px;
+  @include bg('course/btm', .5, center bottom);
+  background-size: 100% $h;
+
+  &::after {
+    content: '';
+    @include sprite-2x(man, true, 'course/sp');
+    bottom: 0;
+  }
+
+//  @include root-modifier('.course-fighting-ctrl') {
+//    height: $h + 38px;
+//  }
+}
+
+.footer-btn, .vote-btn {
+  color: #ffffff;
+  text-align: center;
+  line-height: 22px;
+  font-size: 16px;
+  font-weight: 700;
+  padding-top: 12px;
+  background-color: map-get($colors, o1);
+  @include size(140px 68px);
+  box-shadow: 0 2px rgba(0,0,0,.16);
+}
+.footer-btn {
+  bottom: 85px;
+}
+.footer-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  @include triangle(12px 8px, map-get($colors, o1), down)
+}
+
+.footer-btn.large, .vote-btn.large {
+  padding-top: 0;
+  font-size: 21px;
+  line-height: 68px;
+}
+.vote-btn {
+  margin-top: 12px;
+}
+
+.course-info-ctrl {
+  .box-title {
+    font-size: 18px;
+    line-height: 24px;
+    margin: 20px 0 10px;
+    color: map-get($colors, p3);
+  }
+  .box-sub-title {
+    text-align: center;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 28px;
+    margin: 12px 0 5px;
+    color: map-get($colors, p3);
+  }
+  h5 {
+    text-align: center;
+    font-size: 18px;
+    line-height: 22px;
+    margin: 0;
+    color: map-get($colors, p3);
+  }
+  .txt {
+    line-height: 22px;
+    font-size: 16px;
+    color: map-get($colors, p1);
+  }
+  .man-t, .man-b {
+    position: relative;
+    margin-left: -16px;
+    margin-right: -16px;
+    &::after {
+      content: '';
+      position: absolute;
+    }
+  }
+  .man-t::after {
+    @include sprite-2x(man-t, true, 'course/sp');
+    top: -10px;
+    right: 0;
+  }
+  .man-b::after {
+    @include sprite-2x(man-b, true, 'course/sp');
+    top: -10px;
+    left: 0;
+  }
+}
+
+
+.banner {
+  $h: image-height-ratio('course/top', .5);
+
+  width: 100%;
+  height: $h;
+  @include bg('course/top', .5);
+  background-size: 100% $h;
+
+  h1 {
+    font-size: 36px;
+    line-height: 45px;
+    font-weight: 700;
+    margin: 50px 0 0 0;
+    text-align: center;
+  }
+  .name {
+    color: #8eb6db;
+  }
+
+  &.txt h1 {
+    margin-top: 37px;
+    margin-left: auto;
+    margin-right: auto;
+    @include sprite-2x(top-txt, block, 'course/sp');
+  }
+}
+
+.sub-title {
+  position: relative;
+  height: 72px;
+  width: 100%;
+  &::after {
+    content: ''; @include position(absolute, 0); margin: auto; @include size(100% 1px); background: #d8d8d8;
+  }
+  h2 {
+    display: inline-block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 0 12px;
+    font-size: 24px;
+    line-height: 32px;
+    margin: 20px 0;
+    font-weight: 700;
+    text-align: center;
+    background-color: #ececec;
+  }
+}
+
+.count-down {
+  width: 135px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 2px rgba(0,0,0,.16);
+  .header {
+    background-color: map-get($colors, p3);
+    color: white;
+    line-height: 45px;
+    font-size: 18px;
+  }
+  .body {
+    background-color: white;
+    color: map-get($colors, p3);
+    height: 87px;
+    line-height: 90px;
+    font-size: 40px;
+    font-weight: 700;
+  }
+}
+
+.progress {
+  .header {
+    font-size: 18px;
+    line-height: 22px;
+    margin: 30px 0 12px;
+    color: map-get($colors, p3);
+  }
+  .end {
+    float: right;
+  }
+  .body {
+    position: relative;
+    font-size: 16px;
+    height: 56px;
+    width: 100%;
+    background-color: map-get($colors, p2);
+    box-shadow: 0 2px rgba(0, 0, 0, .16);
+    overflow: hidden;
+  }
+  .run, .txt {
+    position: absolute;
+    height: 100%;
+  }
+  .run {
+    width: 0%;
+    z-index: 1;
+    background-color: #eaa1bc;
+  }
+  &:nth-child(2n) .run {
+    background-color: #8eb6db;
+  }
+  .txt {
+    z-index: 2;
+    line-height: 58px;
+    width: 100%;
+    color: white;
+    text-align: center;
+  }
+}
+
+.courses {
+  .course {
+    position: relative;
+    padding: 0 29px 95px;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      @include sprite-2x(c1, true, 'course/sp');
+    }
+  }
+  .course:nth-child(1) { background: #eaa1bc; margin-top: 0; }
+  .course:nth-child(2) {
+    background: #8ed2db;
+    &::after { @include sprite-2x(c2, false, 'course/sp'); }
+  }
+  .course:nth-child(3) {
+    background: #8eb6db;
+    &::after { @include sprite-2x(c3, false, 'course/sp'); }
+  }
+}
+
+.charges {
+  .charge { padding: 0 29px 26px; }
+  .charge:first-child { margin-top: 0; }
+  .charge:nth-child(2n)   {background-color: #b4dce2;}
+  .charge:nth-child(2n+1) {background-color: #bdd1e3;}
+}

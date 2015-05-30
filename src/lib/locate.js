@@ -41,8 +41,7 @@ module.exports = function(options) {
     distDir = options.distDir,
     projectDir = options.projectDir;
 
-  ylog.line();
-  ylog.info.title('locating asset directory');
+  ylog.ln.info.title('locating asset directory');
 
   // 保存各类文件所在的目录
   var locateBaseDir = assetDir || '.'; // . 表示的是 projectDir，因为默认的 projectDir 是 absolute path

@@ -24,16 +24,7 @@ var postcss = require('postcss'),
 
 module.exports = require('./task-base').extend({
 
-  xinit: function() {
-
-    this.name = 'styles';
-    this.targetExt = 'css';
-
-    var types = ['compass', 'less', 'stylus', 'css'];
-
-    // 查看有没有 sass, less, stylus, css，此函数同时会设置 this.enables 属性
-    this.typedFiles = this.getTypedFiles(types, true);
-
+  init: function() {
     // 有 styles 就一定要编译 css
     this.enables.css = true;
   },
@@ -116,7 +107,10 @@ module.exports = require('./task-base').extend({
     }, compat, taskOpts.cleancss);
 
     ylog.info('cssnext options', taskOpts.cssnext);
-    ylog.info('cleancss options', taskOpts.cleancss);
+
+    if (this.minify) {
+      ylog.info('cleancss options', taskOpts.cleancss);
+    }
   },
 
   compileCompass: function(done) {
@@ -139,7 +133,7 @@ module.exports = require('./task-base').extend({
         // 恢复 bootstrap
         boot.recover();
 
-        if (!err) { ylog.info('@compass@ compile output: ').ln(data); }
+        if (!err) { ylog.debug('@compass@ compile output: ').ln.log(data); }
 
         done(err);
       }

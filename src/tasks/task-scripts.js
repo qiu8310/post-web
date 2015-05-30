@@ -12,21 +12,19 @@ var ylog = require('ylog')('post:scripts'),
 
 module.exports = require('./task-base').extend({
 
-  xinit: function() {
-    this.name = 'scripts';
-    this.targetExt = 'js';  // asyncCompileUnits 中需要用
-
-    var types = ['js', 'babel', 'coffee', 'iced', 'typescript'];
-
-    // 查看有没有 sass, less, stylus, css，此函数同时会设置 this.enables 属性
-    this.typedFiles = this.getTypedFiles(types, true);
-
-    this.options.tasks.scripts.uglify.fromString = true;
+  init: function() {
+    // uglify 配置
+    this.taskOpts.uglify.fromString = true;
   },
 
 
-  initCoffee: function(coffeeOpts) { coffeeOpts.print = true; },
-  initIced: function(icedOpts) { icedOpts.print = true; },
+  initCoffee: function(coffeeOpts) {
+    coffeeOpts.print = true;
+  },
+
+  initIced: function(icedOpts) {
+    icedOpts.print = true;
+  },
 
 
   asyncCompileUnits: {

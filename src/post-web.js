@@ -6,8 +6,6 @@
  * Licensed under the MIT license.
  */
 
-process.env.YLOG = (process.env.YLOG ? process.env.YLOG + ',' : '') + 'post:web';
-
 var _ = require('lodash'),
   ylog = require('ylog')('post:web'),
   path = require('path'),
@@ -17,12 +15,19 @@ var _ = require('lodash'),
   h = require('./helper');
 
 ylog.attributes.time = true;
-ylog.setLevel('info');
 ylog.Tag.ns.len = 15;
 ylog.Tag.ns.align = 'right';
 
 
-function postWeb(dir, command, options) {
+function postWeb(dir, commands, options) {
+
+  if (_.isPlainObject(commands)) {
+    options = commands;
+    commands = null;
+  }
+
+  ylog.setLevel(options.level || 'info');
+  ylog.debug(dir, commands, options);
 
   dir = path.resolve(dir);
 
@@ -62,18 +67,28 @@ function postWeb(dir, command, options) {
   locate(options);
 
   // 运行
+  commands = [].concat(commands || 'compile');
   var control = new Control(options);
+  var doneCompile = function(err) {
+    if (err) {
+      return ylog.fatal(err);
+    }
 
-  if (command in control) {
-    control[command]();
+    ylog.ln.ln.ok('&Compiled ok!&').ln();
+
+    if (_.includes(commands, 'watch')) {
+      control.watch();
+    }
+    if (_.includes(commands, 'server')) {
+      control.server();
+    }
+  };
+
+  if (_.includes(commands, 'compile')) {
+    control.compile(doneCompile)
   } else {
-    ylog.fatal('command @%s@ not found', command);
-    throw new Error('command not found');
+    doneCompile();
   }
 }
-
-postWeb(process.argv[2] || '.', process.argv[3] || 'compile', {assetDir: 't'});
-
-
 
 module.exports = postWeb;

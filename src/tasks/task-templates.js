@@ -20,16 +20,6 @@ var htmlMinifier = require('html-minifier').minify,
 
 module.exports = require('./task-base').extend({
 
-  xinit: function() {
-    this.name = 'templates';
-    this.targetExt = 'html';  // asyncCompileUnits 中需要用
-
-
-    var types = ['html', 'markdown', 'jade', 'slim', 'haml'];
-
-    // 查看有没有 sass, less, stylus, css，此函数同时会设置 this.enables 属性
-    this.typedFiles = this.getTypedFiles(types, true);
-  },
 
   initJade: function(jadeOpts) {
     jadeOpts.pretty = true; // 永远都是 pretty，压缩交给 htmlMinifier

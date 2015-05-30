@@ -1,0 +1,45 @@
+//== system defined
+$data-types: number string color bool null list map;
+
+$number-suffixes: 'px' 'cm' 'mm' '%' 'ch' 'pica' 'in' 'em' 'rem' 'pt' 'pc' 'ex' 'vw' 'vh' 'vmin' 'vmax';
+$number-units:    1px  1cm  1mm  1%  1ch  1pica  1in  1em  1rem  1pt  1pc  1ex  1vw  1vh  1vmin  1vmax;
+
+
+
+//== font related
+$root-font-size: 14px !default; // root-font-size 不能小于 11px，否则设置 height/width 等非 font-size 的属性时，用 rem 时无效
+$root-paragraph-height: 20px; // 段落高度基本是 20 px 了
+
+$root-line-height: $root-paragraph-height / $root-font-size;
+
+
+$default-font: Helvetica, "MICROSOFT YaHei", "Helvetica Neue", Arial, Tahoma, sans-serif !default;
+$code-font: Courier, "Courier New", monospace !default;
+
+
+//== responsive device size
+$tablet-max-width: 899px !default;
+$mobile-max-width: 539px !default;
+
+
+//== BEM separators
+$element-separator: "__";
+$modifier-separator: "--";
+
+
+//== user defined
+$footer-height: 59px;
+$z-indexes: (
+  header: 100,
+  footer: 200,
+  mask: 500
+);
+
+$colors: (
+  p1: #9196a6,
+  p2: #494e6b,
+  p3: #3e405c,
+
+  o1: #ff6c46
+);
+

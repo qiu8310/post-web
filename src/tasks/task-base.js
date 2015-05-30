@@ -46,19 +46,11 @@ module.exports = require('class-extend').extend({
     }, this);
 
 
-    // 执行子类的 init 方法
-    if ('init' in this) { this.init(); }
-
-    // 根据 asyncCompileUnits 生成 compileXxx 函数
-    this.initAsyncCompileFn();
-
-    ylog.silly(this);
-  },
-
-  compile: function() {
-
     // 每次文件变化都要执行此函数，重新定位文件（目录结构变化了就没办法了）
     this.locate();
+
+    // 执行子类的 init 方法
+    if ('init' in this) { this.init(); }
 
     // 方便其它 task 判断当前 task 运行了哪些任务
     //this.taskOpts.enables = this.enables;
@@ -75,10 +67,10 @@ module.exports = require('class-extend').extend({
       ylog.verbose('end run @%s.init%s@', this.name, _.capitalize(task));
     });
 
+    // 根据 asyncCompileUnits 生成 compileXxx 函数
+    this.initAsyncCompileFn();
 
-    ylog.silly('task @%s@ options', this.name, this.taskOpts);
-    ylog.ok('initialized task @%s@', this.name);
-
+    ylog.silly(this);
   },
 
 
@@ -194,6 +186,18 @@ module.exports = require('class-extend').extend({
   },
 
   /**
+   * 此 task 是否应该包含这个文件
+   *
+   * 文件是 watch 中更新的文件，通过此判断此文件是否和此 task 有关联，以此决定是否要重新 compile 此 task
+   *
+   * @param {String} file
+   */
+  includesFile: function(file) {
+    file = path.relative('.', file);
+    return file.indexOf(this.src) === 0 && _.includes(this.extensions, h.ext(file));
+  },
+
+  /**
    * 定位当前 task 中的所有文件，并将它们按类型分类，保存到 typedFiles
    */
   locate: function() {
@@ -267,9 +271,9 @@ module.exports = require('class-extend').extend({
                   data = self.minifyContent(data, cfg);
                 }
 
-                fs.writeFile(dist, data, function(err) {
+                fs.writeFile(cfg.dist, data, function(err) {
                   if (!err) {
-                    ylog.info('&write& ^%s^', dist);
+                    ylog.info('&write& ^%s^', cfg.dist);
                   }
                   done(err);
                 });
@@ -307,8 +311,6 @@ module.exports = require('class-extend').extend({
 
     }, this);
   },
-
-
 
 
   /**

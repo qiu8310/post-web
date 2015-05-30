@@ -6,15 +6,17 @@
  * Licensed under the MIT license.
  */
 var _ = require('lodash'),
+  h = require('./helper'),
   os = require('os'),
   path = require('path');
 
 var options = {
-  // @TODO 所有目录的路径都要相对于此目录，所以在用命令行时，如果用户配置了某个目录，要记得将其转化成相对目录
+  // 所有目录的路径都要相对于此目录，所以在用命令行时，如果用户配置了某个目录，要记得将其转化成相对目录
   projectDir: null,
-  distDir: 'dist',
 
   assetDir: null,
+  distDir: 'dist',
+
   excludeDirs: [], // 需要排除的一些文件夹，如果没有指定 assetDir，程序会自动确认 assetDir，但判断过程可能会受其它目录干扰
 
   environment: 'development',
@@ -29,7 +31,7 @@ var options = {
     styles: ['css', 'sass', 'scss', 'less', 'styl'],
     scripts: ['js', 'jsx', 'coffee', 'iced', 'ts'],
 
-    templates: ['html', 'htm', 'md', 'jade', 'slim', 'haml'],
+    templates: ['html', 'htm', 'jade', 'slim', 'haml'],
 
     // fonts 和 images 中都可能含有 svg 文件，所以两处都不要写它
     images: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
@@ -44,10 +46,11 @@ var options = {
     stylus: ['styl'],
     less: ['less'],
     compass: ['sass', 'scss'],
-    babel: ['jsx'],
+    babel: ['jsx', 'es6'],
     iced: ['iced'],
     typescript: ['ts'],
-    img: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
+    img: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+    font: ['eot', 'ttf', 'woff', 'woff2', 'svg']
   },
 
   src: {},

@@ -7,4 +7,5 @@ npm-debug.log
 gh-pages
 
 public
-t
+dist
+**/dist

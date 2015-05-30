@@ -48,16 +48,17 @@ module.exports = function(args, options, done) {
   });
 
   child.on('close', function (code) {
+    out = out.join('');
+    err = err.join('');
+
     if (done) {
       if (code === 0) {
-        out = out.join('');
-        //ylog.silly('execute ^%s^ result', out);
         ylog.debug('executed ^%s^', cmd);
-
         done(null, out);
       } else {
-        ylog.fatal('executing error `%s`', cmd).ln();
-        ylog.fatal(err.join(''));
+        ylog.no.wrap.fatal('executing error `%s`', cmd).ln();
+        if (out) { ylog.fatal(out); }
+        if (err) { ylog.fatal(err); }
         done(new Error('Execute script error.'));
       }
     }
