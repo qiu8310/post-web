@@ -9,6 +9,7 @@
 var _ = require('lodash'),
   ylog = require('ylog')('post:web'),
   path = require('path'),
+  lookup = require('look-up'),
 
   locate = require('./lib/locate'),
   Control = require('./task-control'),
@@ -24,6 +25,12 @@ function postWeb(dir, commands, options) {
   if (_.isPlainObject(commands)) {
     options = commands;
     commands = null;
+  }
+
+  options = options || {};
+  var cfgFile = lookup('{pweb,postweb,post-web}rc.{json,js,}');
+  if (cfgFile) {
+    options = _.assign(require(cfgFile), options);
   }
 
   ylog.setLevel(options.level || 'info');
@@ -85,7 +92,7 @@ function postWeb(dir, commands, options) {
   };
 
   if (_.includes(commands, 'compile')) {
-    control.compile(doneCompile)
+    control.compile(doneCompile);
   } else {
     doneCompile();
   }

@@ -15,22 +15,25 @@ var ylog = require('ylog')('post:watch');
 var ignores = [];
 
 /**
- * 监听 dir 中的文件的变化
+ * 监听 dirs 中的文件的变化
  *
- * @param {String} dir
+ * @param {String} dirs
  * @param {Object} opts
  * @param {Number} opts.interval
  * @param {Number} opts.debounceDelay
  * @param {Function} cb
  */
-function watch (dir, opts, cb) {
-  var gazePattern = path.join(dir, '**/*.*');
+function watch (dirs, opts, cb) {
+  var gazePattern = [].concat(dirs).map(function(dir) {
+    return path.join(dir, '**/*.*');
+  });
+
   opts = _.assign({
     interval: 400,
     debounceDelay: 600
   }, opts);
 
-  ylog.debug('watch %s', path.resolve(gazePattern));
+  ylog.debug('watch %o', gazePattern);
   ylog.debug('watch options', opts);
 
 

@@ -4,8 +4,8 @@ process.env.YLOG = (process.env.YLOG ? process.env.YLOG + ',' : 'post:*');
 
 var path = require('path');
 var program = require('commander');
-var postWeb = require('./src/post-web');
-var h = require('./src/helper');
+var postWeb = require('./../src/post-web');
+var h = require('./../src/helper');
 
 var requires = [],
   importPaths = [],
@@ -16,7 +16,7 @@ var requires = [],
 
 
 program
-  .version(require(require('path').resolve(__dirname, 'package.json')).version)
+  .version(require(require('path').resolve(__dirname, '../package.json')).version)
   .usage('[options] <directory>')
   .description('自动化编译前端资源')
   .option('-m, --minify',                       '是否要压缩代码或图片')
@@ -72,9 +72,13 @@ var opts = {
   assetDir: getProjectDir(program.assetDir),
   mobile: program.mobile,
 
-  compass: {
-    require: requires.map(getProjectDir),
-    importPath: importPaths.map(getProjectDir)
+  tasks: {
+    styles: {
+      compass: {
+        require: requires.map(getProjectDir),
+        importPath: importPaths.map(getProjectDir)
+      }
+    }
   }
 };
 

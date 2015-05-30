@@ -6,9 +6,7 @@
  * Licensed under the MIT license.
  */
 var _ = require('lodash'),
-  h = require('./helper'),
-  os = require('os'),
-  path = require('path');
+  os = require('os');
 
 var options = {
   // 所有目录的路径都要相对于此目录，所以在用命令行时，如果用户配置了某个目录，要记得将其转化成相对目录
@@ -16,6 +14,8 @@ var options = {
 
   assetDir: null,
   distDir: 'dist',
+
+  server: function(app, serverOpts, globalOpts) {},
 
   excludeDirs: [], // 需要排除的一些文件夹，如果没有指定 assetDir，程序会自动确认 assetDir，但判断过程可能会受其它目录干扰
 

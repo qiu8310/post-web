@@ -233,8 +233,8 @@ module.exports = require('class-extend').extend({
    * 得到一个异步处理文件的 task，可以用到 async 中
    * @param {String} processName
    * @param {String} file
-   * @param {Function} fn
    * @param {String} ext
+   * @param {Function} fn
    * @returns {Function}
    */
   getProcessFileTask: function(processName, file, ext, fn) {
@@ -307,7 +307,7 @@ module.exports = require('class-extend').extend({
         }, this);
 
         this.async.parallelLimit(tasks, this.options.runLimit, done);
-      }
+      };
 
     }, this);
   },

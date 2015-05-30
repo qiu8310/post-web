@@ -10,9 +10,6 @@ var os = require('os'),
   _ = require('lodash');
 
 
-var ylog = require('ylog')('post:tpl');
-
-
 var htmlMinifier = require('html-minifier').minify,
   markdown = require('markdown').markdown,
   jade = require('jade');

@@ -6,8 +6,7 @@
  * Licensed under the MIT license.
  */
 
-var ylog = require('ylog')('post:scripts'),
-  UglifyJS = require('uglify-js');
+var Uglify = require('uglify-js');
 
 
 module.exports = require('./task-base').extend({
@@ -53,12 +52,9 @@ module.exports = require('./task-base').extend({
     }
   },
 
-
-  /* jshint ignore:start */
   minifyContent: function(content, cfg) {
-    return UglifyJS.minify(content, this.taskOpts.uglify).code;
+    return Uglify.minify(content, this.taskOpts.uglify).code;
   },
-  /* jshint ignore:end */
 
   compile: function(done) {
     this.runParallel('compile', ['js', 'babel', 'coffee', 'iced', 'typescript'], done);

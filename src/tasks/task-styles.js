@@ -97,7 +97,7 @@ module.exports = require('./task-base').extend({
         'ie8',
         '+properties.backgroundSizeMerging',
         '+properties.iePrefixHack',
-        '+properties.ieSuffixHack'].join(',')
+        '+properties.ieSuffixHack'].join(',');
     }
 
     taskOpts.cssnext = _.extend({ browsers: browsers }, taskOpts.cssnext);

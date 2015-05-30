@@ -27,6 +27,7 @@
     "clean-css": "^3.2.10",
     "commander": "^2.8.1",
     "connect-livereload": "^0.5.3",
+    "connect-modrewrite": "^0.8.1",
     "cross-spawn": "^0.4.0",
     "cssgrace": "^2.0.2",
     "cssnext": "^1.4.0",
@@ -63,8 +64,8 @@
     "should": "^6.0.1"
   },
   "bin": {
-    "postweb": "cli.js",
-    "pweb": "cli.js"
+    "pweb": "bin/pweb.js",
+    "pwebs": "bin/pwebs.js"
   },
   "scripts": {
     "coveralls": "gulp test && cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",

@@ -159,10 +159,28 @@ _.assign(TaskControl.prototype, {
     require('./server/express-app')(opts, function(app, modifiedOpts) {
 
       self.lr = app.lr;
+      this.modRewrite = require('connect-modrewrite');
+
+      self.options.server.call(this, app, modifiedOpts, self.options);
+
+      /*
+       Url Rewrite Example:
+
+       // http://x.com/a/b/c/styles/spring => http://x.com/spring.html
+       '^/(?:[\\w\\/]+\\/)?(' + APPS.join('|') + ')([^\\.]*)$ /$1.html [L]',
+
+       // http://x.com/a/b/c/styles/spring.css => http://x.com/styles/spring.css
+       '^.*?(styles|images|scripts|views)(\\/.*)$ /$1$2 [L]'
+       */
+
+      //app.use(this.modRewrite([ '^/static/(.*) /$1' ]));
+
 
       // 这个放在最后，因为此 middle ware 是会终止的，不会继续向下执行
       // this === require('express')
       app.use(this.static(self.options.distDir));
+      app.use(this.static(self.options.assetDir));  // 以免有些文件没有移进来
+
 
       // 也可以加上前缀
       // app.use('/static', express.static('public'));

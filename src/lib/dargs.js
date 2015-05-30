@@ -52,11 +52,11 @@ module.exports = function (input, opts) {
 
 
     } else if (typeof val === 'number' && isNaN(val) === false) {
-      createArg(key, val + '');
+      createArg(key, String(val));
 
     } else if (Array.isArray(val)) {
       val.forEach(function (arrVal) {
-        createArg(key, arrVal)
+        createArg(key, arrVal);
       });
     }
   });

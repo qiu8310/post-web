@@ -49,7 +49,7 @@ function removeBootBlock (content) {
 function addBootBlock (content, imports) {
   // 在 content 中的第一个 @import 下面 或最上面 注入 require 的文件
   if (importReg.test(content)) {
-    return content.replace(importReg, function(raw) { return raw + imports });
+    return content.replace(importReg, function(raw) { return raw + imports; });
   } else {
     return imports + content;
   }

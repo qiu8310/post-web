@@ -15,6 +15,12 @@
 - 将 slim、jade 编译成 html
 
 
+TODO
+ 
+* 添加 lint
+* 添加编译某些应用
+* 添加 hash
+
 NOTE:
 
 * 所有以 _ 开头的文件都会当作 partial，不会编译
