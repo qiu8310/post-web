@@ -29,7 +29,7 @@ __缺点：__
 __NOTE:__
 
 * 所有以 _ 开头的文件都会当作 partial，不会编译
-* watch 过程中不要修改原有资源的文件夹名称
+* watch 过程中不要修改原有资源的文件夹名称（因为这些资源文件夹第一次初始化之后在程序中就不会变了）
 * 除了 scripts/styles/templates/images/fonts 之外的其它文件（如 .txt），只有在 production 环境下才会拷贝到 distDir
 
 
@@ -37,7 +37,7 @@ __TODO:__
 
 
 * 添加 lint
-* 添加编译某些应用
+* 添加编译某些应用（已经支持 concat）
 * 添加 hash
 * 完善我的 sass 库
 
@@ -93,10 +93,24 @@ __下面指定的版本号只是我系统上安装过没问题的版本，不代
 
 
 
+### HTML 中的 concat 语法
 
-## SASS 处理流
+RegExp: `/([ \t]*)<!--\s*concat:(\S*)\s+([\s\S]*?)\s*-->/gi`
 
-### [compass](http://compass-style.org/)
+```html
+
+<!-- concat:dir/xx.js a.js,b.js,__bower -->
+
+表示将 scripts/a.js, scripts/b.js 及 bower 安装的模块的所有的 js 文件合并到 scripts/dir/xx.js 中
+
+CSS 的处理方式也类似
+
+```
+
+
+### SASS 处理
+
+[compass](http://compass-style.org/)
 
 __使用的是系统的 compass 命令__
 

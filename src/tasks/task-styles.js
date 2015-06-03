@@ -208,7 +208,7 @@ module.exports = require('./task-base').extend({
 
 
   concatCss: function() {
-    var cssFiles = this.typedFiles.css;
+    var cssFiles = (this.typedFiles.css || []).concat(glob.sync(path.join(this.tmp, '/**/*.css')));
     if (this.production) {
       var diff = [], add = [];
       _.each(this.concat(this.tmp), function(files, target) {

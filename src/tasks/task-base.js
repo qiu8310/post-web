@@ -307,9 +307,9 @@ module.exports = require('class-extend').extend({
               fs.writeFile(dist, data, {encoding: null}, function() {
                 if (err) { return done(err); }
                 ylog.info.writeOk('copy ^%s^ to ^%s^', src, dist);
+                done();
               });
             });
-            done();
           }
         });
       },
