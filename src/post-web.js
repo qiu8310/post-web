@@ -18,6 +18,9 @@ var _ = require('lodash'),
 ylog.attributes.time = true;
 ylog.Tag.ns.len = 15;
 ylog.Tag.ns.align = 'right';
+// timeLevelColors: [[40, 'gray'], [65, 'yellow'], [Infinity, 'red']],
+ylog.timeLevelColors[0][0] = 100;
+ylog.timeLevelColors[1][0] = 200;
 
 
 function postWeb(dir, commands, options) {
@@ -28,13 +31,16 @@ function postWeb(dir, commands, options) {
   }
 
   options = options || {};
-  var cfgFile = lookup('{pweb,postweb,post-web}rc.{json,js,}');
-  if (cfgFile) {
-    options = _.assign(require(cfgFile), options);
-  }
-
   ylog.setLevel(options.level || 'info');
-  ylog.debug(dir, commands, options);
+
+  ylog.debug('postWeb function arguments', dir, commands, options);
+
+  var cfgFile = lookup('pwebrc{.json,.js,}');
+  if (cfgFile) {
+    var cfgData = require(cfgFile);
+    ylog.verbose('get config file ^%s^', cfgFile, cfgData);
+    options = _.merge(cfgData, options);
+  }
 
   dir = path.resolve(dir);
 
@@ -69,6 +75,15 @@ function postWeb(dir, commands, options) {
     options.bowerDirectory = bowerDirectory;  // 大部分插件都需要将这个目录加入 include path
   }
 
+  var env = options.environment;
+  if (options[env]) {
+    _.merge(options, options[env]);
+  }
+  ['production', 'development'].forEach(function(k) { delete options[k]; });
+
+  if (options.assetDir === options.distDir) {
+    throw new Error('distDir should not equal to assetDir');
+  }
 
   // 定位每类文件所在的位置，并将其写入 options
   locate(options);
@@ -82,7 +97,6 @@ function postWeb(dir, commands, options) {
     }
 
     ylog.ln.ln.ok('&Compiled ok!&').ln();
-
     if (_.includes(commands, 'watch')) {
       control.watch();
     }

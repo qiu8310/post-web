@@ -34,12 +34,12 @@ __NOTE:__
 
 
 __TODO:__
- 
+
+
 * 添加 lint
 * 添加编译某些应用
 * 添加 hash
 * 完善我的 sass 库
-
 
 
 ## Usage
@@ -94,8 +94,6 @@ __下面指定的版本号只是我系统上安装过没问题的版本，不代
 
 
 
-
-
 ## SASS 处理流
 
 ### [compass](http://compass-style.org/)
@@ -108,30 +106,6 @@ compass 会自动 require 这几个项目：
 - [ceaser-easing](https://github.com/jhardy/compass-ceaser-easing)
 - [plugins/extensions 下的所有 rb 文件](./plugins/extensions)
 
-
-处理 sass 时，可以指定加载我预先定义好的一些[常用的 sass](./plugins/sass)
-
-__如何加载这些常用的 sass 文件呢？__
-
-1. 假设你有一个文件叫 `app.scss`
-
-2. 在同目录下定义一个 `_app_config.scss` 和 `app.require` 两个文件
-
-  - `_app_config.scss` 是你在 `app.scss` 中 import 的文件，你可以在此文件上面定义一些变量，
-    或者覆盖 importPath 中的 sass 文件中的变量；总之这个文件在 sass 中会最先执行
-
-  - `app.require` 是你的库加载文件，你可以像 `.gitignore` 一样指定 [plugins/sass](./plugins/sass) 目录中或你自定义的 importPath 中的文件，
-    你也可以指定文件夹，前提是文件夹下包含有一个 `_bootstrap.scss` 文件；另外，如果没有 `app.require`，也可以只定义一个 `.require` 文件，
-    不过这个 `.require` 文件就可能被 `bar.scss` 或 `xxx.scss` 文件复用
-    
-3. 在你的 `app.scss` 的最上面使用导入 `_app_config.scss`： `@import "bootstrap";`
-
-4. 在 `app.require` 中定义一些你要加载的文件
-
-5. 大功告成，接下来，你只要在你的项目目录下运行 `pweb` 即可
-
-  - 在编译过程中，会将 `app.require` 中指定的文件导入了 `app.scss` 中，
-    编译完成后就会把这些导入的内容删除，所以你看不出编译前后有什么区别
 
 
 ### [autoprefixer](https://github.com/postcss/autoprefixer)

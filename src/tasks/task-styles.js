@@ -11,7 +11,7 @@ var fs = require('fs-extra'),
   _ = require('lodash'),
   glob = require('glob');
 
-var CpsBoot = require('./../lib/compass-bootstrap');
+//var CpsBoot = require('./../lib/compass-bootstrap');
 var ylog = require('ylog')('post:styles');
 
 
@@ -24,10 +24,6 @@ var postcss = require('postcss'),
 
 module.exports = require('./task-base').extend({
 
-  init: function() {
-    // 有 styles 就一定要编译 css
-    this.enables.css = true;
-  },
 
   initCompass: function() {
     var options = this.options,
@@ -114,11 +110,10 @@ module.exports = require('./task-base').extend({
   },
 
   compileCompass: function(done) {
-    var cpsOpts = this.taskOpts.compass,
-      options = this.options;
+    var cpsOpts = this.taskOpts.compass;
 
     // 设置 bootstrap
-    var boot = new CpsBoot(path.resolve(options.projectDir, options.src.styles), cpsOpts);
+    // var boot = new CpsBoot(path.resolve(this.options.projectDir, this.options.src.styles), cpsOpts);
 
     // 执行 compass 命令
     ylog.info('@compass@ start compile');
@@ -131,7 +126,7 @@ module.exports = require('./task-base').extend({
         fs.removeSync('.sass-cache');
 
         // 恢复 bootstrap
-        boot.recover();
+        // boot.recover();
 
         if (!err) { ylog.debug('@compass@ compile output: ').ln.log(data); }
 
@@ -212,10 +207,21 @@ module.exports = require('./task-base').extend({
   },
 
 
-  compileCss: function(done) {
+  concatCss: function() {
+    var cssFiles = this.typedFiles.css;
+    if (this.production) {
+      var diff = [], add = [];
+      _.each(this.concat(this.tmp), function(files, target) {
+        add.push(target);
+        diff.push.apply(diff, files);
+      });
+      cssFiles = _.difference(cssFiles, diff).concat(add);
+    }
+    return cssFiles;
+  },
 
-    var cssFiles = this.typedFiles.css || [];
-    _.each(cssFiles.concat(glob.sync(path.join(this.tmp, '/**/*.css'))), function(f) {
+  compileCss: function(done) {
+    _.each(this.concatCss(), function(f) {
       this._processCssFile(f);
     }, this);
 
@@ -225,10 +231,13 @@ module.exports = require('./task-base').extend({
 
   compile: function(done) {
 
+    // 有 styles 就一定要编译 css
+    this.enables.css = true;
+
     fs.ensureDirSync(this.tmp);
     this.runSeriesParallel('compile', [['compass', 'stylus', 'less'], 'css'], function(err) {
       fs.removeSync(this.tmp);
-      ylog.info('emtyp directory ^%s^', this.tmp);
+      ylog.info('remove directory ^%s^', this.tmp);
       done(err);
     });
   }

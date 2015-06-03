@@ -9,6 +9,7 @@
 var fs = require('fs-extra'),
   _ = require('lodash'),
   glob = require('glob'),
+  open = require('open'),
   path = require('path');
 
 var EOL = require('os').EOL;
@@ -124,6 +125,13 @@ var helper = {
     return false;
   },
 
+  isFile: function() {
+    try {
+      return fs.statSync(join(arguments)).isFile();
+    } catch (e) {}
+    return false;
+  },
+
   /**
    *
    * 用户配置的目录可能是相对于当前路径的目录，也可能是相对于 projectDir 的目录；
@@ -144,6 +152,25 @@ var helper = {
     }
 
     return path.relative(projectDir, target);
+  },
+
+  /**
+   * 用浏览器打开文件
+   */
+  open: function(dirs, file, host) {
+    if (!file) { return false; }
+
+    var target;
+    if (file === true) { file = '**/*.{html,htm}'; }
+    _.each([].concat(dirs), function(dir) {
+      _.each(helper.findFilesByPattern(path.join(dir, file)), function(f) {
+        target = path.relative(dir, f);
+        return false;
+      });
+      if (target) { return false; }
+    });
+
+    open(host + '/' + target || '');
   },
 
   /**

@@ -102,7 +102,6 @@ function getFilesParentDirectories(files) {
       result.push(file);
     }
   });
-
   return result;
 }
 

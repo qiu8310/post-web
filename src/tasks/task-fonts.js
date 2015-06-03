@@ -10,7 +10,7 @@ var h = require('../helper');
 var _ = require('lodash');
 var path = require('path');
 var FontMin = require('fontmin');
-var ylog = require('ylog')('post:minfont');
+
 module.exports = require('./task-base').extend({
 
   compileFont: function(done) {

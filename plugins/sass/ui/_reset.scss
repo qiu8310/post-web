@@ -21,6 +21,8 @@ html, body {
   font-size: $root-font-size;
   line-height: $root-line-height;
   font-family: $default-font;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
 }
 
 
@@ -47,46 +49,9 @@ ul, ol {
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
-  @include mp();
+  margin: 0;
+  padding: 0;
 }
-
-h1 {
-  letter-spacing: -1px;
-  font-size: 24px;
-  margin: 10px 0;
-}
-
-h2 {
-  letter-spacing: -1px;
-  font-size: 22px;
-  margin: 20px 0;
-
-}
-
-h3 {
-  font-size: 19px;
-  font-weight: 400;
-  margin: 20px 0;
-}
-
-h4 {
-  font-size: 18px;
-  font-weight: 400;
-  margin: 20px 0;
-}
-
-h5 {
-  font-size: 17px;
-  font-weight: 300;
-  margin: 10px 0;
-}
-
-h6 {
-  font-size: 15px;
-  margin: 10px 0;
-  font-weight: 700;
-}
-
 
 
 fieldset, img {
@@ -98,7 +63,9 @@ ins, a {
   text-decoration: none;
   cursor: pointer;
 }
-
+a:hover, a:active, a:link, a:visited {
+  color: inherit;
+}
 a {
   outline: none !important;
 }

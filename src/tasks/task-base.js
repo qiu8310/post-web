@@ -14,11 +14,13 @@ var _ = require('lodash'),
   h = require('../helper'),
   dargs = require('../lib/dargs'),
   prettyBytes = require('pretty-bytes'),
-  ylog = require('ylog')('post:base');
+  ylog = require('ylog')('post:task');
 
 module.exports = require('class-extend').extend({
 
   constructor: function(name, options) {
+
+    this.ylog = ylog;
 
     this.name = name;
     this.options = options;
@@ -30,6 +32,7 @@ module.exports = require('class-extend').extend({
     this.dist = options.dist[name];
     this.tmp = options.tmp[name];
     this.minify = this.attr('minify');
+    this.production = options.environment === 'production';
 
 
     // 得到本 task 中每类文件的后缀名 到文件类型的映射
@@ -187,6 +190,17 @@ module.exports = require('class-extend').extend({
   },
 
   /**
+   * 根据当前的 task 给 file 添加后缀名（如果没有的话）
+   * @param {string} file
+   * @param {string} ext
+   * @returns {string}
+   */
+  appendExt: function(file, ext) {
+    ext = ext || this.meta.finalExtension;
+    return h.ext(file) !== ext ? file + '.' + ext : file;
+  },
+
+  /**
    * 此 task 是否应该包含这个文件
    *
    * 文件是 watch 中更新的文件，通过此判断此文件是否和此 task 有关联，以此决定是否要重新 compile 此 task
@@ -195,14 +209,22 @@ module.exports = require('class-extend').extend({
    */
   includesFile: function(file) {
     file = path.relative('.', file);
-    return file.indexOf(this.src) === 0 && _.includes(this.extensions, h.ext(file));
+    ylog.debug('includesFile file: %s, distDir: %s', file, this.options.distDir);
+    if (file.indexOf(this.options.distDir) === 0) {
+      return false;
+    }
+    return (this.src === '.' || file.indexOf(this.src) === 0) && _.includes(this.extensions, h.ext(file));
   },
 
   /**
    * 定位当前 task 中的所有文件，并将它们按类型分类，保存到 typedFiles
    */
   locate: function() {
-    var files = h.findFilesByExtensions(this.src, this.extensions, true);
+    var ignores = [this.dist, this.options.bowerDirectory].concat(this.options.excludeDirs)
+      .filter(function(dir) { return !!dir; })
+      .map(function(dir) { return path.join(dir, '**'); });
+
+    var files = h.findFilesByExtensions(this.src, this.extensions, true, ignores);
     var typedFiles = {};
     var enables = {};
 
@@ -282,7 +304,7 @@ module.exports = require('class-extend').extend({
           } else {
             fs.readFile(src, function(err, data) {
               if (err) { return done(err); }
-              fs.writeFile(dist, data.toString(), function() {
+              fs.writeFile(dist, data, {encoding: null}, function() {
                 if (err) { return done(err); }
                 ylog.info.writeOk('copy ^%s^ to ^%s^', src, dist);
               });
@@ -345,7 +367,7 @@ module.exports = require('class-extend').extend({
 
                 if (self.minify && self.minifyContent) {
                   ylog.info('minify ^%s^', cfg.dist);
-                  data = self.minifyContent(data, cfg);
+                  data = self.minifyContent(data);
                 }
 
                 fs.writeFile(cfg.dist, data, function(err) {
@@ -390,6 +412,55 @@ module.exports = require('class-extend').extend({
     }, this);
   },
 
+
+  /**
+   * Concat js/css
+   */
+  concat: function(toDir) {
+    var dirs = ['.', this.options.assetDir, this.dist, this.tmp, this.src];
+    var self = this;
+
+    toDir = toDir || this.dist; // concat 到的目标文件夹
+
+    var rtn = {};
+
+    _.each(this.taskOpts.concat, function(files, target) {
+      files = _.map(files, function(f) {
+        f = self.appendExt(f);
+        var dir = _.find(dirs, function(dir) {
+          return h.isFile(dir, f);
+        });
+        if (!dir) {
+          ylog.ln.ln.fatal('can\'t find concat file ^%s^ in directories', f, dirs).ln.log();
+          throw new Error('not find concat file');
+        }
+        return path.join(dir, f);
+      });
+
+
+      var contents = _.map(files, function(f) {
+        var c = h.readFile(f);
+        if (f.indexOf(self.dist) === 0 || f.indexOf(self.tmp) === 0) {
+          fs.removeSync(f);
+          ylog.debug('remove will be concated file ^%s^', f);
+        }
+        return c;
+      }).join(self.options.EOL);
+
+
+      target = path.join(toDir, self.appendExt(target));
+      fs.ensureDir(path.dirname(target));
+      fs.writeFileSync(
+        target,
+        self.minifyContent ? self.minifyContent(contents) : contents
+      );
+
+      ylog.info('&concat& to ^%s^ from', target, files);
+      rtn[target] = files;
+    });
+
+    return rtn;
+  },
 
   /**
    * 全局配置放在 options 下

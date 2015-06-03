@@ -20,18 +20,20 @@ function TaskControl(options) {
   EventEmitter.call(this);
 
   var orders = {
+    templates: 10,
     styles: 9,
     scripts: 8,
-    templates: 7,
     images: 5,
     fonts: 4,
     others: 1
   };
 
   var enabledTaskNames = Object.keys(options.dist)
+    .filter(function(key) { return options.metas[key].enabled; })
     .sort(function(a, b) { return orders[b] - orders[a]; });
 
   var tasks = [];
+
 
   enabledTaskNames.forEach(function(taskName) {
 
@@ -81,7 +83,11 @@ _.assign(TaskControl.prototype, {
         if (!err) {
           this.transformOtherFiles();
         }
-        done(err);
+        if (done) {
+          done(err);
+        } else if (err) {
+          ylog.fatal(err);
+        }
       }.bind(this)
     );
   },
@@ -91,10 +97,16 @@ _.assign(TaskControl.prototype, {
    * 移动除了几个 tasks 之外的其它文件到 dist 目录中去
    */
   transformOtherFiles: function() {
-    if (this.options.environment === 'production') {
-      var assetDir = this.options.assetDir, distDir = this.options.distDir;
+    var opts = this.options;
+    if (opts.environment === 'production') {
+      var assetDir = opts.assetDir, distDir = opts.distDir;
 
-      var allFiles = h.findFilesByExtensions(assetDir, [], true, '**/*.require');
+      var ignores = ['pwebrc{.json,.js,}', '{bower,package}.json'];
+      opts.excludeDirs.concat(distDir, opts.bowerDirectory || []).forEach(function(dir) {
+        ignores.push(path.join(dir, '**/*'));
+      });
+
+      var allFiles = h.findFilesByExtensions(assetDir, ['*'], true, ignores);
       var allTaskFiles = _.reduce(this.tasks, function(sum, task) {
         _.each(task.typedFiles, function(files) {
           sum.push.apply(sum, files);
@@ -102,12 +114,19 @@ _.assign(TaskControl.prototype, {
         return sum;
       }, []);
 
+      var copy = _.assign({}, opts.copy);
+
       ylog.info.ln.title('process other type files');
       _.difference(allFiles, allTaskFiles).forEach(function(file) {
         var distFile = path.join(distDir, path.relative(assetDir, file));
-        fs.writeFileSync(distFile, h.readFile(file));
-        ylog.info.log('&write& ^%s^', distFile);
+        copy[distFile] = file;
       });
+
+      _.each(copy, function(src, dist) {
+        fs.ensureDirSync(path.dirname(dist));
+        fs.writeFileSync(dist, fs.readFileSync(src), {encoding: null});
+        ylog.info('&copy& ^%s^ => ^%s^', src, dist);
+      })
     }
   },
 
@@ -120,7 +139,8 @@ _.assign(TaskControl.prototype, {
    */
   watch: function(opts) {
     var self = this;
-    ylog.info.ln.title('watch directory %s', this.options.assetDir);
+    ylog.info.ln.title('watch src');
+    ylog.info('watch directory ^%s^', this.options.assetDir);
     ylog.debug('watch options', opts);
 
     watch(this.options.assetDir, opts, function(files) {
@@ -162,13 +182,14 @@ _.assign(TaskControl.prototype, {
    * 启动 web 和 livereload 服务器
    *
    * @param {Object} opts
-   * @param {Number} opts.port        - 指定 web 服务器端口，默认 9000
-   * @param {Number} opts.livereload  - 指定 livereload 服务器端口，默认 35729，
-   *                                    如果不想使用 livereload，可以将它设置成 false
+   * @param {Number} opts.port          - 指定 web 服务器端口，默认 9000
+   * @param {Number} opts.livereload    - 指定 livereload 服务器端口，默认 35729，
+   *                                      如果不想使用 livereload，可以将它设置成 false
    *
-   * @param {String} opts.host        - 指定 web 服务器 host，默认 0.0.0.0
-   * @param {String} opts.protocol    - 指定 web 服务器协议，默认 http
-   * @param {Object} opts.watch       - watch 用的选项，有 interval 和 debounceDelay
+   * @param {String|Boolean} opts.open  - 在浏览器上打开一个文件
+   * @param {String} opts.host          - 指定 web 服务器 host，默认 0.0.0.0
+   * @param {String} opts.protocol      - 指定 web 服务器协议，默认 http
+   * @param {Object} opts.watch         - watch 用的选项，有 interval 和 debounceDelay
    *
    * 注意，指定的 port 和 livereload 的端口可能会被使用，如果被使用了，
    *      服务器会自动定位到一个没使用的端口，所以你想要确认最新的端口是什么时，
@@ -176,23 +197,24 @@ _.assign(TaskControl.prototype, {
    */
   server: function(opts) {
     var self = this;
+    var distDir = self.options.distDir, assetDir = self.options.assetDir;
 
     ylog.info.ln.title('start server');
     ylog.debug('server options', opts);
 
-    ylog.info('watch directory ^%s^', this.options.distDir);
-    watch(this.options.distDir, opts && opts.watch, function(files) {
+    ylog.info('watch directory ^%s^', distDir);
+    watch(distDir, opts && opts.watch, function(files) {
       self.livereload(files.map(function(item) {
         return path.relative('.', item[1]);
       }));
     });
 
-    require('./server/express-app')(opts, function(app, modifiedOpts) {
+    require('./server/express-app')(opts, function(app, serOpts) {
 
       self.lr = app.lr;
       this.modRewrite = require('connect-modrewrite');
 
-      self.options.server.call(this, app, modifiedOpts, self.options);
+      self.options.server.handler.call(this, app, serOpts, self.options);
 
       /*
        Url Rewrite Example:
@@ -209,12 +231,15 @@ _.assign(TaskControl.prototype, {
 
       // 这个放在最后，因为此 middle ware 是会终止的，不会继续向下执行
       // this === require('express')
-      app.use(this.static(self.options.distDir));
-      app.use(this.static(self.options.assetDir));  // 以免有些文件没有移进来
-
+      app.use(this.static(distDir));
+      app.use(this.static(assetDir));  // 以免有些文件没有移进来
 
       // 也可以加上前缀
       // app.use('/static', express.static('public'));
+
+    }, function(app, serOpts) {
+
+      h.open(distDir, self.options.server.open, serOpts.base);
 
     });
   }

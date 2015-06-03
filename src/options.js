@@ -9,16 +9,21 @@ var _ = require('lodash'),
   os = require('os');
 
 var options = {
+  EOL: os.EOL,
+
   // 所有目录的路径都要相对于此目录，所以在用命令行时，如果用户配置了某个目录，要记得将其转化成相对目录
   projectDir: null,
 
   assetDir: null,
   distDir: 'dist',
 
-  server: function(app, serverOpts, globalOpts) {
-    // this === express
-    // 并且添加了 modRewrite 到 this 变量中
-    // app.use(this.modRewrite([ '^/static/(.*) /$1' ]));
+  server: {
+    open: false,
+    handler: function(app, serverOpts, globalOpts) {
+      // this === express
+      // 并且添加了 modRewrite 到 this 变量中
+      // app.use(this.modRewrite([ '^/static/(.*) /$1' ]));
+    }
   },
 
   excludeDirs: [], // 需要排除的一些文件夹，如果没有指定 assetDir，程序会自动确认 assetDir，但判断过程可能会受其它目录干扰
@@ -61,23 +66,31 @@ var options = {
   tmp: {},
   dist: {},
 
+  // 需要复制的文件，比如用 bower 安装了 bootstrap 之后，需要将它的字体文件复制到 dist 目录
+  copy: {},
+
   metas: {
     styles: {
+      enabled: true,
       types: ['compass', 'stylus', 'less', 'css'],
       finalExtension: 'css'
     },
     scripts: {
+      enabled: true,
       types: ['babel', 'coffee', 'typescript', 'iced', 'js'],
       finalExtension: 'js'
     },
     templates: {
+      enabled: true,
       types: ['markdown', 'jade', 'slim', 'haml', 'html'],
       finalExtension: 'html'
     },
     images: {
+      enabled: true,
       types: ['image']
     },
     fonts: {
+      enabled: true,
       types: ['font']
     }
   },
@@ -91,8 +104,14 @@ var options = {
       stylus: {},
       less: {},
       postcss: { plugins: [] },
-      cleancss: {},
-      cssnext: {}
+      cleancss: {
+        keepSpecialComments: 0
+      },
+      cssnext: {},
+      concat: {
+        // example: 后缀名可选，目录需要相对于对应资源的目录，而不是项目目录
+        //styl: ['styl-1', 'styl-2', 'sub/styl']
+      }
     },
     scripts: {
       uglify: {
@@ -104,7 +123,8 @@ var options = {
       coffee: {},
       typescript: {
         //module: 'commonjs' // commonjs 或 amd
-      }
+      },
+      concat: {}
     },
     templates: {
       htmlMinifier: {

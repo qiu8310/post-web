@@ -1,0 +1,14 @@
+{
+  "name": "t",
+  "version": "0.0.0",
+  "authors": [
+    "Mora <qiuzhongleiabc@126.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.4"
+  }
+}

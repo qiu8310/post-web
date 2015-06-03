@@ -21,6 +21,7 @@ function getIgnoresFromLocateBaseDir(locateBaseDir, options) {
   var ignores = _.map(options.excludeDirs.concat(options.distDir), function(dir) {
     return path.relative(locateBaseDir, path.join(dir, '**'));
   });
+  ignores.push('pwebrc.js'); // 不要记录配置文件
   ylog.verbose('locating directories exclude those file patterns ^%o^', ignores);
   return ignores;
 }
@@ -49,6 +50,7 @@ module.exports = function(options) {
   var ignores = getIgnoresFromLocateBaseDir(locateBaseDir, options), foundAny;
 
   _.each(cfg, function(exts, key) {
+
     ylog.verbose('locating @%s@ directory by searching file extensions ^%o^', key, exts);
     var locatedDirs = locatePatternDirs('**/[^_]*.' + h.getGlobPatternFromList(cfg[key]), locateBaseDir, ignores);
 
@@ -79,7 +81,8 @@ module.exports = function(options) {
         options.dist[key] = path.join(distDir, path.relative(assetDir, locatedDir));
 
         // 临时文件可能是和项目文件夹同一级别，它可能不在 projectDir 中
-        options.tmp[key] = path.relative(projectDir, path.join(path.dirname(path.resolve(locatedDir)), '.tmp-' + key));
+        var full = path.resolve(locatedDir);
+        options.tmp[key] = path.relative(projectDir, path.join(path.dirname(full), '.tmp-' + path.basename(full)));
         break;
       default :
         ylog.fatal('#%s files directory should be in one directory, two located: %o#', key, locatedDirs);

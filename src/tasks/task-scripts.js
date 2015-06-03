@@ -52,12 +52,17 @@ module.exports = require('./task-base').extend({
     }
   },
 
-  minifyContent: function(content, cfg) {
+  minifyContent: function(content) {
     return Uglify.minify(content, this.taskOpts.uglify).code;
   },
 
   compile: function(done) {
-    this.runParallel('compile', ['js', 'babel', 'coffee', 'iced', 'typescript'], done);
+    this.runParallel('compile', ['js', 'babel', 'coffee', 'iced', 'typescript'], function(err) {
+      if (!err && this.production) {
+        this.concat();
+      }
+      done(err);
+    });
   }
 
 });

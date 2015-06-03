@@ -9,6 +9,8 @@ var h = require('./../src/helper');
 
 var requires = [],
   importPaths = [],
+  disabledTasks = [],
+  excludeDirs = [],
   collect = function(val, container) {
     container.push(val);
     return container;
@@ -19,33 +21,36 @@ program
   .version(require(require('path').resolve(__dirname, '../package.json')).version)
   .usage('[options] <directory>')
   .description('自动化编译前端资源')
-  .option('-m, --minify',                       '是否要压缩代码或图片')
-  .option('-e, --environment',                  '指定编译环境，可以是 production 或 development (default)')
-  .option('-p, --production',                   '设置 environment = production')
-  .option('-r, --require <LIBRARY_NAME>',       '加载其它库文件，透传给 compass', collect, requires)
+  .option('-m, --minify',     '是否要压缩代码或图片')
+  .option('-p, --production', '设置 environment = production，默认是 development')
+  .option('-s, --server',     '启动一个服务器，并将 distDir 设置为根目录')
+  .option('--serve',          '和 --server 一样，方便有些人习惯用 serve，而不是 server')
+  .option('-o, --open [file]','用浏览器打开指定的文件，没指定 file 就随机打开一个（只有启动了服务器才有效）')
+  .option('-w, --watch',      '监听 assetDir 中的文件变化，有变化自动执行相应的命令')
+  .option('--mobile',         '表示此网站是给手机端使用的，这样的话在处理代码时，可以不用兼容 IE')
+
+  .option('-a, --asset-dir <DIRECTORY>',        '指定静态资源的目录，默认是自动在当前目录下寻找')
+  .option('--dist-dir <DIRECTORY>',             '指定导出的目录，默认是项目根目录下的 dist 文件夹')
+  .option('-e, --exclude-dir <DIRECTORY>',      '排除一些文件夹，以免程序在定位资源位置时报错', collect, excludeDirs)
+
+  .option('-d, --disable-task <TASK_NAME>',
+    '禁用指定的 task，有 styles,scripts,images,templates,fonts', collect, disabledTasks)
+
+  .option('-r, --require <SASS_LIBRARY_NAME>',  '加载其它库文件，透传给 compass', collect, requires)
   .option('-I, --import-path <SASS_DIRECTORY>', '使此路径下的 sass 文件可以被 import，透传给 compass', collect, importPaths)
-  .option('-a, --asset-dir <direcotry>',        '指定静态资源的目录，默认是自动在当前目录下寻找')
-  .option('--dist-dir <direcotry>',             '指定导出的目录，默认是项目根目录下的 public 文件')
 
+  .option('--debug',          '将日志级别设置成 debug')
+  .option('--verbose',        '将日志级别设置成 verbose')
+  .option('-q, --quiet',      '将日志级别设置成 silent，即无输出')
+  .option('--level <level>',  '将日志级别设置成指定的值，有 silly, verbose, debug, info, ok , warn, error, fatal, silent')
 
-  .option('--mobile',       '表示此网站是给手机端使用的，这样的话在处理代码时，可以不用兼容 IE')
-
-  .option('--debug',        '将日志级别设置成 debug')
-  .option('--verbose',      '将日志级别设置成 verbose')
-  .option('-q, --quiet',    '将日志级别设置成 silent，即无输出')
-  .option('--level <level>','将日志级别设置成指定的值，有 silly, verbose, debug, info, ok , warn, error, fatal, silent')
-
-
-  .option('-s, --server',   '启动一个服务器，并将 distDir 设置为根目录')
-  .option('--serve',        '和 --server 一样，方便有些人习惯用 serve，而不是 server')
-  .option('-w, --watch',    '监听 assetDir 中的文件变化，有变化自动执行相应的命令')
 
   .parse(process.argv);
 
 
 // @NOTE 这里配置的所有目录都要转化成相对于 projectDir 的目录
 var root = program.args[0] || '.';
-var prod = program.production || program.environment && 'production'.indexOf(program.environment) === 0;
+var prod = program.production;
 var commands = ['compile'];
 var level = 'info';
 
@@ -64,14 +69,25 @@ else if (program.debug) { level = 'debug'; }
 else if (program.quiet) { level = 'silent'; }
 else if (program.level) { level = program.level; }
 
+
 var opts = {
   level: level,
   environment: prod ? 'production' : 'development',
   minify: prod || program.minify,
   distDir: getProjectDir(program.distDir, 'dist'),
   assetDir: getProjectDir(program.assetDir),
+  excludeDirs: excludeDirs.map(getProjectDir),
   mobile: program.mobile,
-
+  server: {
+    open: program.open
+  },
+  metas: {
+    scripts: {},
+    styles: {},
+    templates: {},
+    fonts: {},
+    images: {}
+  },
   tasks: {
     styles: {
       compass: {
@@ -81,6 +97,12 @@ var opts = {
     }
   }
 };
+
+disabledTasks.forEach(function(k) {
+  if (k in opts.metas) {
+    opts.metas[k].enabled = false;
+  }
+});
 
 postWeb(root, commands, opts);
 

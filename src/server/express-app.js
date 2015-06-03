@@ -34,8 +34,9 @@ function findUnusedPort(port, hostname, callback) {
  * @param {String} options.host
  * @param {String} options.protocol
  * @param {Function} cb
+ * @param {Function} startedCb
  */
-function app(options, cb) {
+function app(options, cb, startedCb) {
 
   if (typeof options === 'function') {
     cb = options;
@@ -67,11 +68,11 @@ function app(options, cb) {
       options.port = result[0];
       options.livereload = result[1];
 
-      start(options, cb);
+      start(options, cb, startedCb);
     });
 }
 
-function start(options, cb) {
+function start(options, cb, startedCb) {
 
   var outputHost = options.host === '0.0.0.0' ? 'localhost' : options.host;
 
@@ -114,6 +115,8 @@ function start(options, cb) {
     server = http.createServer(app);
   }
 
+  var base = options.protocol + '://' + outputHost + (options.port === 80 ? '' : ':' + options.port);
+  options.base = base;
   server
     .listen(options.port, options.host)
     .on('error', function(err) {
@@ -123,11 +126,11 @@ function start(options, cb) {
       if (err) {
         ylog.error(err);
       } else {
-        ylog.ok('web server started on ~%s://%s%s~',
-          options.protocol,
-          outputHost,
-          options.port === 80 ? '' : ':' + options.port
-        );
+        ylog.ok('web server started on ~%s~',base);
+      }
+
+      if (startedCb) {
+        startedCb.call(express, app, options);
       }
     });
 }

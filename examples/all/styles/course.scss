@@ -1,12 +1,13 @@
 @import "bootstrap";
 
-//@import "mixin/bootstrap";
-//@import "ui/bootstrap";
-//@import "ui/reset";
-//@import "ui/layout";
-//@import "ui/colors";
-//@import "ui/btn";
-//@import "ui/debug";
+@import "lib/bootstrap";
+@import "mixin/bootstrap";
+@import "ui/bootstrap";
+@import "ui/reset";
+@import "ui/layout";
+@import "ui/colors";
+@import "ui/btn";
+@import "ui/debug";
 
 
 html, body { background: #ececec; }
