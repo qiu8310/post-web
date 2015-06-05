@@ -32,7 +32,7 @@ module.exports = require('./task-base').extend({
       });
 
       // 复制 bootstrap 的字体文件
-      var pkgs = this.wiredep.packages, mains;
+      var pkgs = this.wiredep.packages;
       if (pkgs.bootstrap) {
         pkgs.bootstrap.main.forEach(function(file) {
           if (file.indexOf('fonts') > 0) {

@@ -18,10 +18,8 @@ var _ = require('lodash'),
 ylog.attributes.time = true;
 ylog.Tag.ns.len = 15;
 ylog.Tag.ns.align = 'right';
-// timeLevelColors: [[40, 'gray'], [65, 'yellow'], [Infinity, 'red']],
 ylog.timeLevelColors[0][0] = 100;
 ylog.timeLevelColors[1][0] = 200;
-
 
 function postWeb(dir, commands, options) {
 
@@ -88,6 +86,8 @@ function postWeb(dir, commands, options) {
   // 定位每类文件所在的位置，并将其写入 options
   locate(options);
 
+
+
   // 运行
   commands = [].concat(commands || 'compile');
   var control = new Control(options);
@@ -100,8 +100,13 @@ function postWeb(dir, commands, options) {
     if (_.includes(commands, 'watch')) {
       control.watch();
     }
+
     if (_.includes(commands, 'server')) {
       control.server();
+    }
+
+    if (options.compileEnd) {
+      options.compileEnd();
     }
   };
 

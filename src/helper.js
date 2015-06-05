@@ -9,7 +9,7 @@
 var fs = require('fs-extra'),
   _ = require('lodash'),
   glob = require('glob'),
-  open = require('open'),
+  xopen = require('open'),
   path = require('path');
 
 var EOL = require('os').EOL;
@@ -170,20 +170,7 @@ var helper = {
       if (target) { return false; }
     });
 
-    open(host + '/' + target || '');
-  },
-
-  /**
-   * 封装回调函数
-   * @param {Function} fn
-   * @param {Array} args
-   */
-  asyncCallback: function(fn, args) {
-    args = args || [];
-    return function(cb) {
-      args.push(cb);
-      fn.apply(null, args);
-    };
+    xopen(host + '/' + target || '');
   }
 };
 

@@ -41,7 +41,6 @@ function TaskControl(options) {
 
     var C = require('./tasks/task-' + taskName),
       task = new C(taskName, options);
-
     tasks.push(task);
 
     task.compileWrap = function(done) {
@@ -126,7 +125,7 @@ _.assign(TaskControl.prototype, {
         fs.ensureDirSync(path.dirname(dist));
         fs.writeFileSync(dist, fs.readFileSync(src), {encoding: null});
         ylog.info('&copy& ^%s^ => ^%s^', src, dist);
-      })
+      });
     }
   },
 

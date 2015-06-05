@@ -446,7 +446,8 @@ module.exports = require('class-extend').extend({
         }
 
         // dist 中的文件肯定是压缩了的，只有不在 dist 目录中的文件才需要压缩
-        if (f.indexOf(self.dist) < 0 && self.minifyContent) {
+        // bower 包中的文件夹可能也会含有 dist 路径，所以这里要用 !== 0
+        if (f.indexOf(self.dist) !== 0 && self.minifyContent) {
           c = self.minifyContent(c);
         }
 

@@ -170,13 +170,12 @@ var options = {
 
 module.exports = function(root, userOptions) {
 
-  options = _.merge(options, userOptions);
-  options.projectDir = root;
+  var opts = _.merge({}, options, userOptions);
+  opts.projectDir = root;
 
-  if (options.environment === 'production') {
-    options.minify = true;
+  if (opts.environment === 'production') {
+    opts.minify = true;
   }
 
-  return options;
-
+  return opts;
 };
