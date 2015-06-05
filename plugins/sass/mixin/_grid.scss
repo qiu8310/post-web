@@ -1,0 +1,11 @@
+@mixin grid($cols) {
+  $last: get-last-items-of-selector(&);
+  @for $i from 1 through $cols {
+    &:nth-child(#{$cols}n+1):nth-last-child(#{$i}) {
+      width: 100% / $i;
+      & ~ #{$last} {
+        width: 100% / $i;
+      }
+    }
+  }
+}

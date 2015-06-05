@@ -1,0 +1,98 @@
+// QUANTITY:    http://alistapart.com/article/quantity-queries-for-css
+// GRID:        http://codepen.io/heydon/pen/bcdrl
+// 注意，性能不是很好 => http://jsbin.com/gozula/1/quiet
+
+// Move to func/mixed
+//@function get-last-items-of-selector($selector) {
+//  $items: ();
+//  @each $s in $selector {
+//    $items: append($items, nth($s, length($s)), comma);
+//  }
+//  @return $items;
+//}
+
+
+/// 只有一个元素
+@mixin equal-to-one() {
+  &:only-child {
+    @content;
+  }
+}
+
+/// 不只一个元素
+@mixin more-than-one() {
+  &:not(:only-child) {
+    @content;
+  }
+}
+
+/// 只有 $total 个元素，并选择所有这些元素
+@mixin equal-to($total) {
+  $items: get-last-items-of-selector(&);
+  &:nth-last-child(#{$total}):first-child,
+  &:nth-last-child(#{$total}):first-child ~ #{$items} {
+    @content;
+  }
+}
+
+/// 只有 $total 个元素，并选择其中的第 $n 个元素
+@mixin nth-equal-to($total, $n) {
+  $last: $total - $n + 1;
+  &:nth-child(#{$n}):nth-last-child(#{$last}) {
+    @content;
+  }
+}
+
+/// 元素个数大于或等于 $n 时，选择所有元素
+@mixin more-or-equal-than($n) {
+  $items: get-last-items-of-selector(&);
+  $expr: "n+#{$n}";
+  &:nth-last-child(#{$expr}),
+  &:nth-last-child(#{$expr}) ~ #{$items} {
+    @content;
+  }
+}
+@mixin more-than($n) {
+  @include more-or-equal-than($n + 1) {
+    @content;
+  };
+}
+
+
+/// 元素个数小于或等于 $n 时，选择所有元素
+@mixin less-or-equal-than($n) {
+  $items: get-last-items-of-selector(&);
+  $expr: "-n+#{$n}";
+  &:nth-last-child(#{$expr}):first-child,
+  &:nth-last-child(#{$expr}):first-child ~ #{$items} {
+    @content;
+  }
+}
+@mixin less-than($n) {
+  @include less-or-equal-than($n - 1) {
+    @content;
+  };
+}
+
+
+
+// 其它 CSS 自带的
+/*
+
+:empty                无子元素
+:not(:empty)          有子元素
+:last-nth-child(n+6)  从第1个元素到倒数第6个元素
+:last-nth-child(-n+6) 倒数6个元素
+:nth-child(n+6)       从第6个元素到最后1个元素
+:nth-child(-n+6)      从第1个元素到第6个元素
+
+
+type 和 child 类似，只是 type 不会管所有子元素的个数，它是管相同类型的子元素的个数
+
+:only-of-type
+:first-of-type
+:last-of-type
+:nth-of-type
+:nth-last-of-type
+
+*/

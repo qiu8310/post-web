@@ -1,0 +1,26 @@
+@import "../mixin/shape";
+
+.rect1 {
+  @include rect(20px 30px true, block, false);
+}
+
+.rect2 {
+  @include rect(20px);
+}
+
+.rect3 {
+  @include rect(0 false 30px, inline, 40px 30px);
+}
+
+
+.squire100-with-line-height50 {
+  @include square(100px 50px);
+}
+
+.display-block--width100-height100-line-height-100 {
+  @include square(100px true, block);
+}
+
+.width100--height100--border-radius50 {
+  @include circle(100px);
+}

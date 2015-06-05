@@ -1,6 +1,3 @@
-'use strict';
-
-
 /*
   ASSERT:
     ok(value, [message]) - Tests if value is a true value.
@@ -28,11 +25,15 @@
 
 var postWeb = require('../');
 var assert = require('should');
+var path = require('path');
+var root = path.join(path.dirname(__dirname), 'examples');
+
 
 describe('postSass', function () {
 
   it('should be work', function () {
-    postWeb.should.be.a.Function;
+    this.timeout(10000);
+    postWeb(root, {assetDir: 'sass', level: 'debug'});
   });
 
 });

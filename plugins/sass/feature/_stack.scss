@@ -1,0 +1,62 @@
+// $some-stack: ((group: red, status: dark, value: red), (group: red, status: light, value: '#a00'));
+// stack-helper($some-stack, (group: red, status: dark));
+@function stack-helper($stack, $attributes-map, $key: false) {
+  $found: null;
+
+  @each $item in $stack {
+    $failed: false;
+    @each $key, $val in $attributes-map {
+      @if map-get($item, $key) != $val {
+        $failed: true;
+      }
+    }
+    @if not $found and not $failed {
+      $found: $item;
+    }
+  }
+
+  @if not $found {
+    @error 'Not found' $attributes-map 'in' $stack;
+  }
+
+  @return if($key, map-get($found, $key), $found);
+}
+// @TODO 写个 img-responsive($display: block)
+// @TODO 写个设定 div 宽高比的函数
+// @TODO element query
+// @TODO swipe-page
+
+$color-stack: (
+    (group: red, id: default, value: red),
+    (group: cyan, id: default, value: cyan)
+) !default;
+
+$font-stack: (
+    (group: title, id: bigger)
+    (group: title, id: big)
+    (group: title, id: small)
+) !default;
+
+$z-index-stack: (
+    (group: footer, value: 100),
+    (group: header, value: 100)
+) !default;
+
+
+@function color($group, $id, $transparency: 1) {
+  $val: stack-helper($color-stack, (group: $group, id: $id), value);
+  @return if($transparency < 1, rgba($val, $transparency), $val);
+}
+
+@mixin z-index($group) {
+  z-index: stack-helper($z-index-stack, (group: $group), value);
+}
+@mixin font($group, $id) {
+  $stack: stack-helper($font-stack, (group: $group, id: $id));
+  @each $key in font font-family font-size line-height font-style font-weight margin padding {
+    $val: map-get($stack, $key);
+    @if $val {
+      #{$key}: $val;
+    }
+  }
+}

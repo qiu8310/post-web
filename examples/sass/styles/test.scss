@@ -1,3 +1,85 @@
+@import "basic";
+
 a {
-    color: red;
+  width: image-w(grid);
+  height: image-h(grid);
 }
+
+b {
+  @include image-w(grid);
+  @include image-h(grid);
+}
+
+p {
+  @include image-s(grid);
+}
+
+div {
+  @include image-s(grid, 0.1);
+}
+
+span {
+  @include image-w(grid, 0.1);
+  @include image-h(grid, 0.1)
+}
+
+
+.bg {
+  @include bg('grid.png', false, 0.5);
+  @include bg('cro');
+}
+
+.sp {
+  @include sprite('buttons/cross');
+  @include sprite-2x('buttons/cross', false);
+}
+.sp-key {
+  @include sprite-pos('key', true, 2);
+  @include sprite-holder('key', block);
+}
+
+
+// Sass 不会合并两个 media 中有相同定义的 attribute
+// 原因可以看这 https://github.com/less/less.js/issues/950
+.retina-1 {
+  @include bg("grid");
+}
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1),
+only screen and (        min-device-pixel-ratio: 2),
+only screen and (                min-resolution: 192dpi),
+only screen and (                min-resolution: 2dppx) {
+  .retina-1 {
+    @include bg-2x("grid")
+  }
+}
+
+
+.retina-2 {
+  @include bg(grid);
+}
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1),
+only screen and (        min-device-pixel-ratio: 2),
+only screen and (                min-resolution: 192dpi),
+only screen and (                min-resolution: 2dppx) {
+  .retina-2 a b {
+    color: green;
+    @include bg-2x(grid);
+  }
+}
+
+
+
+.r-1 {
+  @include sprite-retina(sp/cc);
+}
+.r-2 {
+  @include sprite-retina(key)
+}
+
+@include retina-dump();

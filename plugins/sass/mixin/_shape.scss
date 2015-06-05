@@ -1,0 +1,42 @@
+@mixin rect($w-h-lh, $display: false, $radius: false) {
+  $width: nth($w-h-lh, 1);
+  $height: if(length($w-h-lh) >= 2, nth($w-h-lh, 2), false);
+  $line-height: if(length($w-h-lh) >= 3, nth($w-h-lh, 3), false);
+
+
+  @if $display and $display != '' {
+    display: $display;
+  }
+
+  @if $width {
+    width: $width;
+  }
+
+  @if $height {
+    height: $height;
+  }
+
+  @if $line-height == true {
+    line-height: nth($w-h-lh, 2);
+  } @else if $line-height {
+    line-height: $line-height;
+  }
+
+  @if $radius == true {
+    border-radius: 50%;
+  } @else if $radius {
+    border-radius: $radius;
+  }
+}
+
+@mixin square($size-lh, $display: false) {
+  $size: nth($size-lh, 1);
+  $line-height: if(length($size-lh) >= 2, nth($size-lh, 2), false);
+  @include rect($size $size $line-height, $display, false);
+}
+
+@mixin circle($size-lh, $display: false, $radius: true) {
+  $size: nth($size-lh, 1);
+  $line-height: if(length($size-lh) >= 2, nth($size-lh, 2), false);
+  @include rect($size $size $line-height, $display, $radius);
+}

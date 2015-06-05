@@ -1,0 +1,49 @@
+@import "../mixin/selector-modifier";
+
+.a b {
+  color: red;
+  @include selector-modifier(1 prepend li) {
+    color: green;
+  }
+  @include selector-modifier(1 append li) {
+    color: green;
+  }
+  @include selector-modifier(2 delete) {
+    color: green;
+  }
+  @include selector-modifier(2 replace li) {
+    color: green;
+  }
+
+  @include selector-modifier(2 prefix en-) {
+    color: green;
+  }
+
+  @include selector-modifier(2 suffix -zh) {
+    color: green;
+  }
+}
+
+// 多个 selectors
+ul li a, table tr td {
+  color: black;
+  @include selector-modifier(1 prepend div) {
+    color: yellow;
+  }
+  @include selector-modifier(-2 suffix '.yellow') {
+    color: yellow;
+  }
+}
+
+
+// 多个 modifiers
+.a .bb .c.cc .d {
+  width: 100px;
+  @include selector-modifier(1 suffix '.aa', 2 prefix '.b', -1 delete) {
+    width: 20px;
+  }
+
+  @include selector-modifier(1 append x, 2 append x, 4 prepend x) {
+    width: 30px;
+  }
+}

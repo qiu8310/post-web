@@ -1,0 +1,156 @@
+
+/*
+  得到 SASS 里的一个数字的单位，如 %, px, em 等单位
+
+  NOTE 直接用 unit 函数，当没单位时 unit 会返回空字符串
+
+  @function number-unit($number) {
+    $number-str: to-string($number);
+
+    $unit: false;
+
+    @for $i from 1 through length($number-suffixes) {
+      $suffix: nth($number-suffixes, $i);
+
+      @if str-index($number-str, $suffix) {
+        $unit: $suffix;
+      }
+    }
+
+    @return $unit;
+  }
+
+*/
+
+
+/*
+  判断 SASS 里的一个数字是否含有单位
+
+  NOTE 直接用 unitless 函数，没单位时返回 true
+
+  @function number-has-unit($number) {
+
+    @return if(number-unit($number) == false , false, true);
+
+  }
+*/
+
+/*
+  去掉一个数字的单位
+*/
+@function strip-unit($number) {
+  @return $number / ($number * 0 + 1);
+}
+
+
+
+/*
+  4 clamped to 1-3 equals 3
+  -5 clamped to 1-10 equals 1
+  42 clamped to 10-100 equals 42
+
+  http://hugogiraudel.com/2013/08/12/sass-functions/#section-2
+*/
+@function clamp($value, $min, $max) {
+  @return if($value > $max, $max, if($value < $min, $min, $value));
+}
+
+/*
+  Unit conversion
+
+  http://hugogiraudel.com/2013/08/12/sass-functions/#section-3
+  http://codepen.io/HugoGiraudel/pen/rdgse
+*/
+@function convert-angle($value, $unit) {
+  $convertable-units: deg grad turn rad;
+  $conversion-factors: 1 10grad/9deg 1turn/360deg 3.1415926rad/180deg;
+  @if index($convertable-units, unit($value)) and index($convertable-units, $unit) {
+    @return $value
+             / nth($conversion-factors, index($convertable-units, unit($value)))
+             * nth($conversion-factors, index($convertable-units, $unit));
+  } @else {
+    @error "Cannot convert #{unit($value)} to #{$unit}";
+  }
+}
+
+
+// 将一维的值转换成二维的值
+@function d2($val) {
+  @return (nth($val, 1), if(length($val) > 1, nth($val, 2), nth($val, 1)));
+}
+
+// 得到像 margin, padding 那样的四维的值
+// d4()         => (false false false false)
+// d4(1px)              => (1px 1px 1px 1px)
+// d4(1px 2px)          => (1px 2px 1px 2px)
+// d4(1px 2px 3px)      => (1px 2px 3px 2px)
+// d4(1px 2px 3px 4px)  => (1px 2px 3px 4px)
+@function d4($val) {
+  $len: if($val, length($val), 0);
+
+  $first: false;
+  $second: false;
+  $third: false;
+  $forth: false;
+
+  @if $len >= 1 {
+    $first:   nth($val, 1);
+  }
+  @if $len >= 2 {
+    $second:  nth($val, 2);
+  }
+  @if $len >= 3 {
+    $third:   nth($val, 3);
+  }
+  @if $len >= 4 {
+    $forth:   nth($val, 4);
+  }
+
+  @if $len == 1 {
+    $second: $first;
+    $third:  $first;
+    $forth:  $first;
+  } @else if $len == 2 {
+    $third:  $first;
+    $forth:  $second;
+  } @else if $len == 3 {
+    $forth:  $second;
+  }
+
+  @return ($first $second $third $forth);
+}
+
+
+// 计算一个数相对于另一个数的比例，第一个数本身可以是个比例，如：
+// relative(0.1) => 0.1
+// relative(50%) => 0.5
+// relative(20px, 100px) => 0.2
+@function relative($number, $relative: 1) {
+  $unit: unit($number);
+
+  $per: $number;
+
+  @if $unit == unit($relative) {
+    $per: $number / $relative;
+  } @else if $unit == '%' {
+    $per: strip-unit($number) / 100;
+  } @else if $unit == '' {
+    $per: $number;
+  } @else {
+    @error 'number and relative unit should be the same!' $number $relative;
+  }
+
+  @return $per
+}
+
+
+// 得到一个数的百分比的值
+// rate(100px, 20%)     => 20px
+// rate(100px, .2)      => 20px
+// rate(100px, 20px)    => 20px
+@function rate($number, $percent: false) {
+  @if not $percent {
+    @return $number;
+  }
+  @return $number * relative($percent, $number);
+}

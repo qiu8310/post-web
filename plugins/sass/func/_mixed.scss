@@ -1,0 +1,65 @@
+
+$image-extensions: (png jpg jpeg gif) !default;
+
+$_image-src-cache: ();
+@function image-src($icon, $suffix: '') {
+  $index: str-last-index($icon, '.');
+  @if $index {
+    $ext: str-slice($icon, $index + 1);
+    @if index($image-extensions, $ext) {
+      @return str-slice($icon, 1, $index - 1) + $suffix + str-slice($icon, $index);
+    }
+  }
+
+  $icon: $icon + $suffix;
+  @if map-has-key($_image-src-cache, $icon) {
+    @return map-get($_image-src-cache, $icon);
+  }
+
+  @each $ext in $image-extensions {
+    $file: "#{$icon}.#{$ext}";
+    @if exist($file) {
+      $_image-src-cache: map-set($_image-src-cache, $icon, $file) !global;
+      @return $file;
+    }
+  }
+
+  @return null;
+}
+
+
+@function _image-size-helper($type, $icon, $ratio) {
+  $icon: image-src($icon);
+  $s: if($type == 'width', image-width($icon), image-height($icon));
+  @return round(rate($s, $ratio)); // 图片的 px 长度不能是小数
+}
+@function image-w($icon, $ratio: 1) {
+  @return _image-size-helper('width', $icon, $ratio);
+}
+@function image-h($icon, $ratio: 1) {
+  @return _image-size-helper('height', $icon, $ratio);
+}
+@function image-s($icon, $ratio: 1) {
+  $ratio: d2($ratio);
+  $w: _image-size-helper('width', $icon, nth($ratio, 1));
+  $h: _image-size-helper('height', $icon, nth($ratio, 2));
+  @return ($w $h);
+}
+
+@function get-specified-type-from-list($list, $accept-types) {
+  @each $item in $list {
+    @if index($accept-types, type-of($item)) {
+      @return $item;
+    }
+  }
+  @error 'Not found ' $accept-types ' in ' $list;
+}
+
+
+@function get-last-items-of-selector($selector) {
+  $items: ();
+  @each $s in $selector {
+    $items: append($items, nth($s, length($s)), comma);
+  }
+  @return $items;
+}

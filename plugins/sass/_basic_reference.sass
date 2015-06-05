@@ -1,0 +1,152 @@
+// 下面的函数是 compass 里带的，但编辑器会报错，我这里只声明一下，但不要把这个文件导入了
+@function sprite-map($glob-pattern)
+@function sprite-path($map, $sprite)
+@function sprite-file($map, $sprite)
+@function sprite-url($map, $sprite)
+@function sprite-position($map, $sprite)
+@function image-width($file)
+@function image-height($file)
+@function image-url($path, $only-path: false)
+@function exists($file)
+@function reverse($str)
+
+// func/types
+@function is-true($value)
+@function to-string($value)
+@function to-map($value)
+@function to-bool($value)
+@function to-list($value)
+@function to-number($string)
+
+
+// func/map
+@function map-set($map, $key, $val)
+
+
+// func/number
+@function strip-unit($number)
+@function clamp($value, $min, $max)
+@function convert-angle($value, $unit)
+@function d2($val)
+@function d4($val)
+@function relative($number, $relative: 1)
+@function rate($number, $percent: false)
+
+
+// func/string
+@function str-last-index($string, $needle)
+@function str-repeat($string, $times)
+@function str-replace($string, $search, $replace: "")
+
+
+// func/list
+@function is-empty($list)
+@function is-single($list)
+@function last($list)
+@function first($list)
+@function last-index($list, $value)
+@function prepend($list, $value)
+@function unique($list)
+@function reverse($list)
+@function range($length)
+@function every($list, $function, $args...)
+@function some($list, $function, $args...)
+@function walk($list, $function, $args...)
+@function purge($list)
+@function explode($string, $delimiter: '', $separator: "space")
+@function implode($list, $glue: "")
+@function insert-nth($list, $index, $value)
+@function replace-nth($list, $index, $value)
+@function remove-nth($list, $index)
+@function slice($list, $start: 1, $end: length($list))
+
+
+// func/mixed
+@function image-src($icon, $suffix: '')
+@function image-w($icon, $ratio: 1)
+@function image-h($icon, $ratio: 1)
+@function image-s($icon, $ratio: 1)
+@function get-specified-type-from-list($list, $accept-types)
+@function get-last-items-of-selector($selector)
+
+// mixin/basic
+=mp($margin: 0, $padding: 0)
+=hyphens($mode: auto)
+=placeholder($color: $input-color-placeholder)
+=user-select($select: none)
+=text-overflow()
+=clearfix()
+
+
+// mixin/extend_css3
+=translate($x, $y)
+=translateX($x)
+=translateY($y)
+=rotate($degrees)
+=rotateX($degrees)
+=rotateY($degrees)
+=scale($ratio...)
+=scaleX($ratio)
+=scaleY($ratio)
+=skew($x, $y)
+=skewX($x)
+=skewY($y)
+=border-top-radius($radius)
+=border-right-radius($radius)
+=border-bottom-radius($radius)
+=border-left-radius($radius)
+
+
+// mixin/position
+=position($pos, $val: false)
+
+
+// mixin/shape
+=rect($w-h-lh, $display: false, $radius: false)
+=square($size-lh, $display: false, $radius: false)
+=circle($size-lh, $display: false)
+
+
+// mixin/triangle
+=triangle($size, $color, $direction)
+
+
+// mixin/selector-modifier
+=selector-modifier($modifiers...)
+=parent-modifier($selector)
+=root-modifier($selector)
+
+
+// mixin/image
+=image-w($icon, $ratio: 1)
+=image-h($icon, $ratio: 1)
+=image-s($icon, $ratio: 1)
+=bg($icon, $bg-attributes: 'no-repeat', $ratio: 1)
+=bg-2x($icon, $bg-attributes: no-repeat)
+=sprite($icon, $size: true, $ratio: 1)
+=sprite-2x($icon, $size: true)
+=sprite-pos($icon, $size: false, $ratio: 1)
+=sprite-pos-2x($icon, $size: false)
+=sprite-holder($icon, $size: false, $ratio: 1)
+=sprite-holder-2x($icon, $size: false)
+
+
+// mixin/retina
+=bg-retina($icon, $bg-attributes: false)
+=sprite-retina($icon, $size: true)
+=retina-dump()
+
+
+// mixin/quantity
+=equal-to-one()
+=more-than-one()
+=equal-to($total)
+=nth-equal-to($total, $n)
+=more-or-equal-than($n)
+=more-than($n)
+=less-or-equal-than($n)
+=less-than($n)
+
+
+// mixin/grid
+=grid($cols)

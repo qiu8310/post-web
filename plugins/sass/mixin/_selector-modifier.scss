@@ -50,6 +50,12 @@ $selector-modifier-default-place: suffix !default;
     $place: unquote(if($len == 2, $selector-modifier-default-place, nth($modifier, 2)));
     $status: unquote(if($len == 2, nth($modifier, 2), nth($modifier, 3)));
 
+    @if $len == 2 and nth($modifier, 2) == 'delete' {
+      $place: 'delete';
+      $status: '';  // 随便设置一个值即可，后面也用不到
+    }
+
+
     @if not index($places, $place) {
       @error "$modifier $place argument must be one of (#{$places})";
     }
@@ -143,15 +149,7 @@ $selector-modifier-default-place: suffix !default;
 
 
 
-
-
-
-
-
-
-
-
-//=== 下面两函数暂时没用到
+//=== 下面两函数暂时没用到，只是觉得写的不错
 
 // 交换列表中 index 为 $i 和 $j 的两项
 @function list-items-switch($list, $i, $j) {

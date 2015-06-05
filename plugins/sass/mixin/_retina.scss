@@ -1,0 +1,75 @@
+// 只需要在同一目录下放一个 xxx.png 和一个 xxx@2x.png 的文件
+// 然后调用 bg-retina(xxx), bg-retina(...)
+// 最后调用 retina-dump 就行了
+
+// 也可以在不同的两个目录，如 aa/xxx.png  aa@2x/xxx.png
+// 然后调用 bg-retina(aa/xxx), ...
+
+
+$_retina-dump-data: ();
+@mixin bg-retina($icon, $bg-attributes: false) {
+  $list: (bg, $icon);
+  $list: append($list, &);
+  $_retina-dump-data: append($_retina-dump-data, $list) !global;
+  @include bg($icon, $bg-attributes);
+}
+
+
+
+@mixin sprite-retina($icon, $size: true) {
+  @if not str-index($icon, '/') {
+    $icon: "#{$_sprite-default-dir}/#{$icon}";
+  }
+
+  $list: (sprite, $icon);
+  $list: append($list, &);
+  $_retina-dump-data: append($_retina-dump-data, $list) !global;
+  @include sprite($icon, $size);
+}
+
+
+// Sass 不会合并两个 media 中有相同定义的 attribute
+// 详细原因可以看这里：https://github.com/less/less.js/issues/950
+//
+// 需要手动触发输出你所使用的所有 retina image
+// 需要如果你用了 retina，则最后一定要使用一下 retina-dump （记得是在最后使用）
+@mixin retina-dump() {
+  // Short retina mixin for setting background-image and -size. Note that the
+  // spelling of `min--moz-device-pixel-ratio` is intentional.
+  @media
+  only screen and (-webkit-min-device-pixel-ratio: 2),
+  only screen and (   min--moz-device-pixel-ratio: 2),
+  only screen and (     -o-min-device-pixel-ratio: 2/1),
+  only screen and (        min-device-pixel-ratio: 2),
+  only screen and (                min-resolution: 192dpi),
+  only screen and (                min-resolution: 2dppx) {
+    @each $list in $_retina-dump-data {
+      $key: nth($list, 1);
+      $icon: nth($list, 2);
+      $selector: nth($list, 3);
+
+      $dir: false;  // 独立的文件夹存放 2x 大小的文件
+      $file: image-src($icon, '@2x');
+      $index: str-last-index($icon, '/');
+      @if not $file and $index {
+        $dir: str-slice($icon, 1, $index - 1) + '@2x';
+        $file: image-src($dir + str-slice($icon, $index));
+      }
+      @if not $file {
+        @error 'Not found @2x file for' $icon;
+      }
+
+      #{$selector} {
+        @if $key == 'bg' {
+          @include bg-2x($file);
+        } @else if $key == 'sprite' {
+          @if not $dir {
+            @error 'Retina directory should exist for ' $icon;
+          }
+          @include sprite-2x(str-slice($file, 1, str-last-index($file, '.') - 1), false);
+        }
+      }
+
+    }
+  }
+}

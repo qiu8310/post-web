@@ -1,3 +1,0 @@
-@mixin z-index($tag) {
-  z-index: map-get($z-indexes, $tag);
-}

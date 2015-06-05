@@ -1,70 +1,31 @@
+@mixin image-w($icon, $ratio: 1) {
+  width: image-w($icon, $ratio);
+}
+@mixin image-h($icon, $ratio: 1) {
+  height: image-h($icon, $ratio);
+}
+@mixin image-s($icon, $ratio: 1) {
+  width: image-w($icon, $ratio);
+  height: image-h($icon, $ratio);
+}
 
+@mixin bg($icon, $bg-attributes: no-repeat, $ratio: 1) {
+  $file: image-src($icon);
+  @if not $file {
+    @error 'Not found bg file' $icon;
+  }
 
-@function _to-ratio-number($ratio, $unit-number, $just-ratio: false) {
-  $unit: unit($ratio);
-
-  // 没有单位，表示它就是一个 ratio
-  @if $unit == '' {
-    $ratio: $ratio;
-  } @else if $unit == '%' {
-    $ratio: strip-unit($ratio) / 100;
+  @if $bg-attributes {
+    background: join(image-url($file), $bg-attributes, 'space');
   } @else {
-    @if not $just-ratio {
-      @return $ratio;
-    }
-    $ratio: $ratio / $unit-number; // 要保证两个单位相同
+    background-image: image-url($file);
   }
-
-  @return if($just-ratio, $ratio, $unit-number * $ratio);
-}
-
-@function _icon-ratio($icon, $ratio) {
-  $icon: "#{$icon}.png";
-
-  @if $ratio == 1 {
-    @return (1, 1);
+  @if $ratio != 1 {
+    background-size: image-s($icon, $ratio);
   }
-
-  $ratio-1: _to-ratio-number(nth($ratio, 1), image-width($icon), true);
-  $ratio-2: $ratio-1;
-  @if length($ratio) > 1 {
-    $ratio-2: _to-ratio-number(nth($ratio, 1), image-height($icon), true);
-  }
-
-  @return ($ratio-1, $ratio-2);
 }
-
-@function image-width-ratio($icon, $ratio: 1) {
-  $icon-path: "#{$icon}.png";
-  $width: image-width($icon-path);
-
-  @return _to-ratio-number($ratio, $width);
-}
-
-@function image-height-ratio($icon, $ratio: 1) {
-  $icon-path: "#{$icon}.png";
-  $height: image-height($icon-path);
-
-  @return _to-ratio-number($ratio, $height);
-}
-
-@mixin image-size-ratio($icon, $ratio: 1) {
-  $ratio: _icon-ratio($icon, $ratio);
-  width: image-width-ratio($icon, nth($ratio, 1));
-  height: image-height-ratio($icon, nth($ratio, 2));
-}
-
-@mixin bg($icon, $ratio: 1, $position: false) {
-  $ratio: _icon-ratio($icon, $ratio);
-  $width: image-width-ratio($icon, nth($ratio, 1));
-  $height: image-height-ratio($icon, nth($ratio, 2));
-
-  background-image: image-url("#{$icon}.png");
-  background-repeat: no-repeat;
-  background-size: $width $height;
-  @if $position {
-    background-position: $position;
-  }
+@mixin bg-2x($icon, $bg-attributes: no-repeat) {
+  @include bg($icon, $bg-attributes, 0.5);
 }
 
 
@@ -82,6 +43,7 @@ $_sprite-default-dir: sp;
     $_sprites-call: map-set($_sprites-call, $folder, $call-time + 1) !global;
 
   } @else {
+    // Only PNG files can be made into css sprites at this time.
     // $sprite-map: sprite-map("#{$folder}/*.png", $layout: smart, $spacing: 4px);
     $sprite-map: sprite-map("#{$folder}/*.png", $spacing: 4px);
     $_sprites: map-set($_sprites, $folder, $sprite-map) !global;
@@ -90,58 +52,71 @@ $_sprite-default-dir: sp;
   @return $sprite-map;
 }
 
-@mixin sprite-pos($icon, $ratio: 1, $folder: $_sprite-default-dir) {
-  // 算出整个 sprite 需要绽放的倍数
-  $ratio: _icon-ratio("#{$folder}/#{$icon}", $ratio);
-  $ratio_1: nth($ratio, 1);
-  $ratio_2: nth($ratio, 2);
 
-  $sprite-map: _get-sprite-map($folder);
-  $pos: sprite-position($sprite-map, $icon);
-  background-position: nth($pos, 1) * $ratio_1 nth($pos, 2) * $ratio_2;
-}
+@mixin sprite-helper($type, $icon, $size, $ratio) {
+  $ratio: d2($ratio);
 
-@mixin sprite-2x-pos($icon, $folder: $_sprite-default-dir) {
-  @include sprite-pos($icon, 50%, $folder);
-}
+  // the sprite folder
+  $index: str-last-index($icon, '/');
+  $folder: if($index, str-slice($icon, 1, $index - 1), $_sprite-default-dir);
+  $basename: if($index, str-slice($icon, $index + 1), $icon);
 
+  $file: image-src("#{$folder}/#{$basename}");
+  @if not $file {
+    @error 'Not found sprite file for' $icon;
+  }
 
-@mixin sprite($icon, $ratio: 1, $size: true, $folder: $_sprite-default-dir) {
+  $w: image-width($file);
+  $h: image-height($file);
+
+  $rw: relative(nth($ratio, 1), $w);
+  $rh: relative(nth($ratio, 2), $h);
+
   $sprite-map: _get-sprite-map($folder);
   $sprite-path: sprite-path($sprite-map);
-  $icon-path: "#{$folder}/#{$icon}.png";
+  $sprite-pos: sprite-position($sprite-map, $basename);
 
-  background-image: sprite-url($sprite-map);
-
-  $icon-width: image-width($icon-path);
-  $icon-height: image-height($icon-path);
-
-
-  // 算出整个 sprite 需要绽放的倍数
-  $ratio: _icon-ratio("#{$folder}/#{$icon}", $ratio);
-  $ratio_1: nth($ratio, 1);
-  $ratio_2: nth($ratio, 2);
-
-
-  @if $ratio_1 != 1 and $ratio_2 != 1  {
-    $sp-width: image-width($sprite-path);
-    $sp-height: image-height($sprite-path);
-    background-size: round($sp-width * $ratio_1) round($sp-height * $ratio_2);
+  @if $type == 'holder' or $type == 'default' {
+    background-image: sprite-url($sprite-map);
+    // 如果都是 1，就没必要输出 bg-size 了
+    @if $rw != 1 or $rh != 1 {
+      background-size: image-s($sprite-path, $rw $rh);
+    }
   }
 
-  $pos: sprite-position($sprite-map, $icon);
-  background-position: nth($pos, 1) * $ratio_1 nth($pos, 2) * $ratio_2;
+  @if $type == 'pos'or $type == 'default' {
+    background-position: nth($sprite-pos, 1) * $rw nth($sprite-pos, 2) * $rh;
+  }
 
   @if $size {
-    display: if($size == true, inline-block, $size);
-    width: round($icon-width * $ratio_1);
-    height: round($icon-height * $ratio_2);
+    @if type-of($size) == 'string' {
+      display: $size;
+    }
+    width: image-w($file, $rw);
+    height: image-h($file, $rh);
   }
 }
 
-@mixin sprite-2x($icon, $size: true, $folder: $_sprite-default-dir) {
-  @include sprite($icon, 50%, $size, $folder);
+@mixin sprite($icon, $size: true, $ratio: 1) {
+  @include sprite-helper('default', $icon, $size, $ratio);
+}
+@mixin sprite-2x($icon, $size: true) {
+  @include sprite($icon, $size, 0.5);
 }
 
+
+@mixin sprite-pos($icon, $size: false, $ratio: 1) {
+  @include sprite-helper('pos', $icon, $size, $ratio);
+}
+@mixin sprite-pos-2x($icon, $size: false) {
+  @include sprite-pos($icon, $size, 0.5);
+}
+
+@mixin sprite-holder($icon, $size: false, $ratio: 1) {
+  @include sprite-helper('holder', $icon, $size, $ratio);
+}
+@mixin sprite-holder-2x($icon, $size: false) {
+  @include sprite-holder($icon, $size, 0.5);
+}
 
 

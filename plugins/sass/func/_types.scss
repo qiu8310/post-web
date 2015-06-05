@@ -6,6 +6,23 @@ http://hugogiraudel.com/2014/01/27/casting-types-in-sass/
 */
 
 
+
+/**
+ * Returns truthiness of `$value`.
+ *
+ * @access private
+ *
+ * @param {*} $value - value to check
+ *
+ * @return {Bool}
+ */
+
+@function is-true($value) {
+  @return if($value == null, false, $value and $value != null and $value != "" and $value != ());
+}
+
+
+
 @function to-string($value) {
   @return inspect($value);
 }
@@ -19,18 +36,37 @@ http://hugogiraudel.com/2014/01/27/casting-types-in-sass/
 }
 
 
-@function to-list($value) {
-  @return if(type-of($value) != list, ($value,), $value);
+/**
+ * Casts `$value` into a list.
+ *
+ * @ignore Documentation: http://sassylists.com/documentation.html#sl-to-list
+ *
+ * @param {*} $value - value to cast to list
+ * @param {String} $separator (space) - separator to use
+ *
+ * @example
+ * to-list(a b c, comma)
+ * // a, b, c
+ *
+ * @return {List}
+ */
+
+@function to-list($value, $separator: list-separator($value)) {
+  @return join((), $value, $separator);
 }
 
-
-
-
+@function to-map($list) {
+  $indexes: ();
+  @for $i from 1 through length($list) {
+    $indexes: append($indexes, $i);
+  }
+  @return zip($indexes, $list);
+}
 
 @function _to-number-length($number, $unit) {
   // the variable are put on _setting.scss
-  // $number-suffixes: 'px' 'cm' 'mm' '%' 'ch' 'pica' 'in' 'em' 'rem' 'pt' 'pc' 'ex' 'vw' 'vh' 'vmin' 'vmax';
-  // $number-units:   1px  1cm  1mm  1%  1ch  1pica  1in  1em  1rem  1pt  1pc  1ex  1vw  1vh  1vmin  1vmax;
+  $number-suffixes: 'px' 'cm' 'mm' '%' 'ch' 'pica' 'in' 'em' 'rem' 'pt' 'pc' 'ex' 'vw' 'vh' 'vmin' 'vmax';
+  $number-units:   1px  1cm  1mm  1%  1ch  1pica  1in  1em  1rem  1pt  1pc  1ex  1vw  1vh  1vmin  1vmax;
   $index: index($number-suffixes, $unit);
 
   @if not $index {

@@ -1,0 +1,261 @@
+// https://github.com/at-import/SassyLists/tree/master/stylesheets/SassyLists
+
+
+@function is-empty($list) {
+  @return length($list) == 0;
+}
+
+@function is-single($list) {
+  @return length($list) == 1;
+}
+
+@function last($list) {
+  @if is-empty($list) {
+    @warn "Cannot find last item of empty list.";
+    @return null;
+  }
+
+  @return nth($list, -1);
+}
+
+@function first($list) {
+  @if is-empty($list) {
+    @warn "Cannot find first item of empty list.";
+    @return null;
+  }
+
+  @return nth($list, 1);
+}
+
+@function last-index($list, $value) {
+  @for $i from length($list) through 1 {
+    @if nth($list, $i) == $value {
+      @return $i;
+    }
+  }
+  @return null;
+}
+
+@function prepend($list, $value) {
+  @return join($value, $list, list-separator($list));
+}
+
+@function unique($list) {
+  $result: ();
+
+  @each $item in $list {
+    @if not index($result, $item) {
+      $result: append($result, $item, list-separator($list));
+    }
+  }
+
+  @return to-list($result);
+}
+@function reverse($list) {
+  $result: ();
+  @for $i from length($list) through 1 {
+    $result: append($result, nth($list, $i));
+  }
+  @return $result;
+}
+@function range($length) {
+  $indexes: ();
+  @for $i from 1 through $length {
+    $indexes: append($indexes, $i);
+  }
+  @return $indexes;
+}
+@function every($list, $function, $args...) {
+  @each $item in $list {
+    @if not call($function, $item, $args...) {
+      @return false;
+    }
+  }
+
+  @return true;
+}
+@function some($list, $function, $args...) {
+  @each $item in $list {
+    @if call($function, $item, $args...) {
+      @return true;
+    }
+  }
+  @return false;
+}
+@function walk($list, $function, $args...) {
+  @each $index, $value in to-map($list) {
+    $list: set-nth($list, $index, call($function, $value, $args...));
+  }
+  @return to-list($list);
+}
+/** Removes all false and null values from `$list`.
+ *
+ * @ignore Documentation: http://sassylists.com/documentation.html#purge
+ *
+ * @requires is-true
+ * @requires to-list
+ *
+ * @param {List} $list - list to purge
+ *
+ * @example
+ * purge(null a false b)
+ * // a b
+ *
+ * @return {List}
+ */
+
+@function purge($list) {
+  $result: ();
+  @each $item in $list {
+    @if is-true($item) {
+      $result: append($result, $item, list-separator($list));
+    }
+  }
+  @return to-list($result);
+}
+
+/**
+ * Explodes `$string` into a list using `$delimiter` as a delimiter.
+ *
+ * @ignore Documentation: http://sassylists.com/documentation.html#explode
+ *
+ * @param {String} $string              - string to explode
+ * @param {String} $delimiter ('')      - string to use as a delimiter
+ * @param {String} $separator ('space') - list separator
+ *
+ * @throws $string is not a string for `explode`.
+ * @throws $delimiter is not a string for `explode`.
+ *
+ * @example
+ * explode(abc)
+ * // a b c
+ *
+ * @example
+ * explode(abc, b)
+ * // a c
+ *
+ * @return {List}
+ */
+@function explode($string, $delimiter: '', $separator: "space") {
+
+  $result: ();
+  $length: str-length($string);
+
+  @if not index("space" "comma", $separator) {
+    $separator: "space";
+  }
+
+  @if str-length($delimiter) == 0 {
+    @for $i from 1 through $length {
+      $result: append($result, str-slice($string, $i, $i));
+    }
+
+    @return $result;
+  }
+
+  $running: true;
+  $remaining: $string;
+
+  @while $running {
+    $index: str-index($remaining, $delimiter);
+
+    @if not $index {
+      $running: false;
+    }
+
+    @else {
+      $slice: str-slice($remaining, 1, $index - 1);
+      $result: append($result, $slice, $separator);
+      $remaining: str-slice($remaining, $index + str-length($delimiter));
+    }
+  }
+
+  @return append($result, $remaining, $separator);
+}
+
+
+/// Implode `$list` into a string.
+/// @since 1.2.0
+/// @param {List} $list - list to convert to string
+/// @param {String} $glue - list's glue
+/// @return {String}
+@function implode($list, $glue: "") {
+  $result: "";
+  $first: true;
+
+  @each $item in $list {
+    $result: $result + if($first, "", $glue) + if(length($item) > 1, implode($item), $item);
+    $first: false;
+  }
+
+  @return $result;
+}
+
+
+// insert-nth(a b c, 2, z)
+// a z b c
+@function insert-nth($list, $index, $value) {
+  $length: length($list);
+  $sep: list-separator($list);
+
+  @if $index > $length {
+    @return append($list, $value, $sep);
+  } @else if $index < 1 {
+    @return prepend($list, $value, $sep)
+  }
+
+  $result: ();
+
+  @for $i from 1 through $length {
+    @if $i == $index {
+      $result: append($result, $value, $sep);
+    }
+    $result: append($result, nth($list, $i), $sep);
+  }
+
+  @return $result;
+}
+
+@function replace-nth($list, $index, $value) {
+  @return set-nth($list, $index, $value);
+}
+
+@function remove-nth($list, $index) {
+  $length: length($list);
+  $sep: list-separator($list);
+  $result: ();
+
+  @for $i from 1 through $length {
+    @if $i != $index {
+      $result: append($result, nth($list, $i), $sep);
+    }
+  }
+  @return $result;
+}
+
+
+/**
+ * Slices `$list` between `$start` and `$end`.
+ *
+ * @ignore Documentation: http://sassylists.com/documentation.html#sl-slice
+ *
+ * @example
+ * slice(a b c d e, 2, 4)
+ * // b c d
+ *
+ * @example
+ * slice(a b c d e, 2, 2)
+ * // b
+ *
+ *
+ * @return {List}
+ */
+@function slice($list, $start: 1, $end: length($list)) {
+  $result: ();
+
+  @for $i from $start through $end {
+    $result: append($result, nth($list, $i), list-separator($list));
+  }
+
+  @return $result;
+}

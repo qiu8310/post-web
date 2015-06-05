@@ -444,6 +444,12 @@ module.exports = require('class-extend').extend({
           fs.removeSync(f);
           ylog.debug('remove will be concated file ^%s^', f);
         }
+
+        // dist 中的文件肯定是压缩了的，只有不在 dist 目录中的文件才需要压缩
+        if (f.indexOf(self.dist) < 0 && self.minifyContent) {
+          c = self.minifyContent(c);
+        }
+
         return c;
       }).join(self.options.EOL);
 
@@ -452,7 +458,8 @@ module.exports = require('class-extend').extend({
       fs.ensureDir(path.dirname(target));
       fs.writeFileSync(
         target,
-        self.minifyContent ? self.minifyContent(contents) : contents
+        contents
+        //self.minifyContent ? self.minifyContent(contents) : contents // 合并后再压缩太慢了
       );
 
       ylog.info('&concat& to ^%s^ from', target, files);

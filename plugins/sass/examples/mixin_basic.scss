@@ -1,0 +1,34 @@
+@import "../mixin/basic";
+
+.mp {
+  @include mp;
+}
+.mp1 {
+  @include mp(10px);
+}
+.mp3 {
+  @include mp(false, 20px);
+}
+
+.hyphens {
+  @include hyphens;
+}
+
+.placeholder {
+  @include placeholder;
+}
+.placeholder1 {
+  @include placeholder(red);
+}
+
+.no-select {
+  @include user-select;
+}
+
+.text-overflow {
+  @include text-overflow;
+}
+
+.clearfix {
+  @include clearfix;
+}

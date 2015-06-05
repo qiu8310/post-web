@@ -1,0 +1,5 @@
+@import "../mixin/triangle";
+
+.t {
+  @include triangle(100px 20px, red, up);
+}

@@ -1,0 +1,29 @@
+@import "../basic";
+
+.just-default-position {
+  @include position;
+}
+
+
+.just-position {
+  @include position(relative);
+}
+
+
+.just-values {
+  @include position(false, 5px);
+}
+.just-values-2 {
+  @include position(false, 5px 10px);
+}
+.just-values-3 {
+  @include position(false, 5px 10px 20px);
+}
+.just-values-4 {
+  @include position(false, 5px 20px 30px 10px);
+}
+
+
+.just-top-bottom-values {
+  @include position(false, 5px false);
+}

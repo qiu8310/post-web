@@ -1,0 +1,54 @@
+// Transformations
+@mixin scale($ratio...) {
+  transform: scale($ratio);
+}
+@mixin scaleX($ratio) {
+  transform: scaleX($ratio);
+}
+@mixin scaleY($ratio) {
+  transform: scaleY($ratio);
+}
+@mixin skew($x, $y) {
+  transform: skewX($x) skewY($y);
+}
+@mixin skewX($x) {
+  transform: skewX($x);
+}
+@mixin skewY($y) {
+  transform: skewY($y);
+}
+@mixin translate($x, $y) {
+  transform: translate($x, $y);
+}
+@mixin translateX($x) {
+  transform: translateX($x);
+}
+@mixin translateY($y) {
+  transform: translateX($y);
+}
+@mixin rotate($degrees) {
+  transform: rotate($degrees);
+}
+@mixin rotateX($degrees) {
+  transform: rotateX($degrees);
+}
+@mixin rotateY($degrees) {
+  transform: rotateY($degrees);
+}
+
+@mixin border-top-radius($radius) {
+  border-top-right-radius: $radius;
+  border-top-left-radius: $radius;
+}
+@mixin border-right-radius($radius) {
+  border-bottom-right-radius: $radius;
+  border-top-right-radius: $radius;
+}
+@mixin border-bottom-radius($radius) {
+  border-bottom-right-radius: $radius;
+  border-bottom-left-radius: $radius;
+}
+@mixin border-left-radius($radius) {
+  border-bottom-left-radius: $radius;
+  border-top-left-radius: $radius;
+}
