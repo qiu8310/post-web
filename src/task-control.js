@@ -65,6 +65,7 @@ util.inherits(TaskControl, EventEmitter);
 
 _.assign(TaskControl.prototype, {
   compile: function(done) {
+    var opts = this.options;
     async.eachSeries(
       this.tasks,
       function(task, done) {
@@ -80,7 +81,10 @@ _.assign(TaskControl.prototype, {
       },
       function(err) {
         if (!err) {
-          this.transformOtherFiles();
+          if (opts.environment === 'production') {
+            this.transformOtherFiles();
+            this.removeEmptyDirectories();
+          }
         }
         if (done) {
           done(err);
@@ -92,41 +96,48 @@ _.assign(TaskControl.prototype, {
   },
 
   /**
+   * 清除空的文件夹
+   */
+  removeEmptyDirectories: function() {
+    h.removeEmptyDirectories(this.options.distDir);
+  },
+
+  /**
    * 当 environment = production 时
    * 移动除了几个 tasks 之外的其它文件到 dist 目录中去
    */
   transformOtherFiles: function() {
     var opts = this.options;
-    if (opts.environment === 'production') {
-      var assetDir = opts.assetDir, distDir = opts.distDir;
 
-      var ignores = ['pwebrc{.json,.js,}', '{bower,package}.json'];
-      opts.excludeDirs.concat(distDir, opts.bowerDirectory || []).forEach(function(dir) {
-        ignores.push(path.join(dir, '**/*'));
+    var assetDir = opts.assetDir, distDir = opts.distDir;
+
+    var ignores = ['pwebrc.{json,js}', '{bower,package}.json'];
+    opts.excludeDirs.concat(distDir, opts.bowerDirectory || []).forEach(function(dir) {
+      ignores.push(path.join(dir, '**/*'));
+    });
+
+    var allFiles = h.findFilesByExtensions(assetDir, ['*'], true, ignores);
+    var allTaskFiles = _.reduce(this.tasks, function(sum, task) {
+      _.each(task.typedFiles, function(files) {
+        sum.push.apply(sum, files);
       });
+      return sum;
+    }, []);
 
-      var allFiles = h.findFilesByExtensions(assetDir, ['*'], true, ignores);
-      var allTaskFiles = _.reduce(this.tasks, function(sum, task) {
-        _.each(task.typedFiles, function(files) {
-          sum.push.apply(sum, files);
-        });
-        return sum;
-      }, []);
+    var copy = _.assign({}, opts.copy);
 
-      var copy = _.assign({}, opts.copy);
+    ylog.info.ln.title('process other type files');
+    _.difference(allFiles, allTaskFiles).forEach(function(file) {
+      var distFile = path.join(distDir, path.relative(assetDir, file));
+      copy[distFile] = file;
+    });
 
-      ylog.info.ln.title('process other type files');
-      _.difference(allFiles, allTaskFiles).forEach(function(file) {
-        var distFile = path.join(distDir, path.relative(assetDir, file));
-        copy[distFile] = file;
-      });
+    _.each(copy, function(src, dist) {
+      fs.ensureDirSync(path.dirname(dist));
+      fs.writeFileSync(dist, fs.readFileSync(src), {encoding: null});
+      ylog.info('&copy& ^%s^ => ^%s^', src, dist);
+    });
 
-      _.each(copy, function(src, dist) {
-        fs.ensureDirSync(path.dirname(dist));
-        fs.writeFileSync(dist, fs.readFileSync(src), {encoding: null});
-        ylog.info('&copy& ^%s^ => ^%s^', src, dist);
-      });
-    }
   },
 
   /**

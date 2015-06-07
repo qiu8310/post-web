@@ -18,7 +18,7 @@ module Sass::Script::Functions
 
   include Compass::SassExtensions::Functions::Files
 
-  def reverse(string)
+  def str_reverse(string)
     assert_type string, :String
     Sass::Script::String.new(string.value.reverse)
   end

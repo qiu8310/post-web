@@ -161,16 +161,36 @@ var helper = {
     if (!file) { return false; }
 
     var target;
-    if (file === true) { file = '**/*.{html,htm}'; }
+    var found = file === true ? '**/*.{html,htm}' : file;
     _.each([].concat(dirs), function(dir) {
-      _.each(helper.findFilesByPattern(path.join(dir, file)), function(f) {
+      _.each(helper.findFilesByPattern(path.join(dir, found)), function(f) {
         target = path.relative(dir, f);
         return false;
       });
       if (target) { return false; }
     });
 
-    xopen(host + '/' + target || '');
+    xopen(host + '/' + (target || (file === true ? '' : file)));
+  },
+
+
+  removeEmptyDirectories: function(dir) {
+    var isEmpty = false, count = 0;
+    _.each(fs.readdirSync(dir), function(file) {
+      var child = path.join(dir, file);
+      if (helper.isDirectory(child)) {
+        count += helper.removeEmptyDirectories(child) ? 0 : 1;
+      } else {
+        count ++;
+      }
+    });
+
+    if (count === 0) {
+      fs.removeSync(dir);
+      isEmpty = true;
+    }
+
+    return isEmpty;
   }
 };
 

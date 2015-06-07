@@ -74,12 +74,8 @@ var opts = {
   level: level,
   environment: prod ? 'production' : 'development',
   minify: prod || program.minify,
-  distDir: getProjectDir(program.distDir, 'dist'),
-  assetDir: getProjectDir(program.assetDir),
   excludeDirs: excludeDirs.map(getProjectDir),
-  mobile: program.mobile,
   server: {
-    open: program.open
   },
   metas: {
     scripts: {},
@@ -97,6 +93,20 @@ var opts = {
     }
   }
 };
+
+// 单独配置是因为这里的优先级最高，如果没配置就不要强加上，否则会覆盖配置文件中的配置
+if (program.assetDir) {
+  opts.assetDir = getProjectDir(program.assetDir);
+}
+if (program.distDir) {
+  opts.distDir = getProjectDir(program.distDir);
+}
+if (program.open) {
+  opts.server.open = program.open;
+}
+if (program.mobile) {
+  opts.mobile = program.mobile;
+}
 
 disabledTasks.forEach(function(k) {
   if (k in opts.metas) {

@@ -359,15 +359,15 @@ module.exports = require('class-extend').extend({
                 var postCompile = 'post' + _.capitalize(processName) + 'Compile';
                 postCompile = (postCompile in self) ? postCompile : 'postCompile';
                 if (self[postCompile]) {
-                  ylog.verbose('use @%s@ on ^%s^', postCompile, cfg.src);
+                  ylog.debug('use @%s@ on ^%s^', postCompile, cfg.src);
                   data = self[postCompile](data, cfg);
                 }
 
                 if (typeof data !== 'string') { return done(err); }
 
                 if (self.minify && self.minifyContent) {
-                  ylog.info('minify ^%s^', cfg.dist);
-                  data = self.minifyContent(data);
+                  ylog.info('&minify& ^%s^', cfg.src);
+                  data = self.minifyContent(data, cfg.src);
                 }
 
                 fs.writeFile(cfg.dist, data, function(err) {
@@ -417,7 +417,7 @@ module.exports = require('class-extend').extend({
    * Concat js/css
    */
   concat: function(toDir) {
-    var dirs = ['.', this.options.assetDir, this.dist, this.tmp, this.src];
+    var dirs = [this.options.distDir, this.dist, this.tmp, '.', this.options.assetDir, this.src];
     var self = this;
 
     toDir = toDir || this.dist; // concat 到的目标文件夹
@@ -430,7 +430,14 @@ module.exports = require('class-extend').extend({
         var dir = _.find(dirs, function(dir) {
           return h.isFile(dir, f);
         });
+
         if (!dir) {
+          // 可能 .tmp 目录中，但目录需要 rebase 一下
+          dir = path.join(self.tmp, f.replace(/^\w+\/{1}/, ''));
+          if (h.isFile(dir)) {
+            return dir;
+          }
+
           ylog.ln.ln.fatal('can\'t find concat file ^%s^ in directories', f, dirs).ln.log();
           throw new Error('not find concat file');
         }
@@ -448,7 +455,7 @@ module.exports = require('class-extend').extend({
         // dist 中的文件肯定是压缩了的，只有不在 dist 目录中的文件才需要压缩
         // bower 包中的文件夹可能也会含有 dist 路径，所以这里要用 !== 0
         if (f.indexOf(self.dist) !== 0 && self.minifyContent) {
-          c = self.minifyContent(c);
+          c = self.minifyContent(c, f);
         }
 
         return c;
@@ -515,6 +522,16 @@ module.exports = require('class-extend').extend({
     return this._getDir(dir);
   },
 
+  inBowerDir: function(file) {
+    return this.options.bowerDirectory && file.indexOf(this.options.bowerDirectory) === 0;
+  },
+  inSrcDir: function(file) {
+    return file.indexOf(this.src) === 0;
+  },
+  inSrcButNotBowerDir: function(file) {
+    return this.inSrcDir(file) && !this.inBowerDir(file);
+  },
+
   /**
    * 调用系统命令
    * @param {String|Array} cmds
@@ -529,5 +546,8 @@ module.exports = require('class-extend').extend({
 
   async: async,
   spawn: spawn,
-  dargs: dargs
+  dargs: dargs,
+  path: path,
+  fs: fs,
+  h: h
 });

@@ -1,6 +1,6 @@
 // QUANTITY:    http://alistapart.com/article/quantity-queries-for-css
 // GRID:        http://codepen.io/heydon/pen/bcdrl
-// 注意，性能不是很好 => http://jsbin.com/gozula/1/quiet
+// 注意，在频繁更新DOM的地方性能不是很好 => http://jsbin.com/gozula/1/quiet
 
 // Move to func/mixed
 //@function get-last-items-of-selector($selector) {
@@ -36,7 +36,7 @@
 }
 
 /// 只有 $total 个元素，并选择其中的第 $n 个元素
-@mixin nth-equal-to($total, $n) {
+@mixin nth-equal-to($n, $total) {
   $last: $total - $n + 1;
   &:nth-child(#{$n}):nth-last-child(#{$last}) {
     @content;

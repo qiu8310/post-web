@@ -33,13 +33,12 @@ function postWeb(dir, commands, options) {
 
   ylog.debug('postWeb function arguments', dir, commands, options);
 
-  var cfgFile = lookup('pwebrc{.json,.js,}');
+  var cfgFile = lookup('pwebrc.{json,js}');
   if (cfgFile) {
     var cfgData = require(cfgFile);
-    ylog.verbose('get config file ^%s^', cfgFile, cfgData);
+    ylog.debug('get config file ^%s^', cfgFile, cfgData);
     options = _.merge(cfgData, options);
   }
-
   dir = path.resolve(dir);
 
   process.chdir(dir); // 如果目录不存在，这里会抛出异常，就不需要我去控制了
@@ -71,6 +70,13 @@ function postWeb(dir, commands, options) {
   var bowerDirectory = options.bowerrc.directory || 'bower_components';
   if (h.isDirectory(bowerDirectory)) {
     options.bowerDirectory = bowerDirectory;  // 大部分插件都需要将这个目录加入 include path
+  }
+
+  if (options.angular === null) {
+    options.angular = bkg.dependencies && bkg.dependencies.angular;
+    if (options.angular) {
+      ylog.info('detect this is a angular project, angular version ^%s^', options.angular);
+    }
   }
 
   var env = options.environment;

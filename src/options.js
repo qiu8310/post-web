@@ -16,7 +16,7 @@ var options = {
 
   assetDir: null,
   distDir: 'dist',
-
+  angular: null,
   server: {
     open: false,
     handler: function(app, serverOpts, globalOpts) {

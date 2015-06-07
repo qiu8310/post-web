@@ -43,6 +43,7 @@
     "look-up": "^0.7.1",
     "markdown": "^0.5.0",
     "mkdirp": "^0.5.1",
+    "ng-annotate": "^1.0.0",
     "open": "0.0.5",
     "portscanner": "^1.0.0",
     "postcss": "^4.1.10",

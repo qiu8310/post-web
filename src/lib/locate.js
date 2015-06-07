@@ -85,7 +85,8 @@ module.exports = function(options) {
         options.tmp[key] = path.relative(projectDir, path.join(path.dirname(full), '.tmp-' + path.basename(full)));
         break;
       default :
-        ylog.fatal('#%s files directory should be in one directory, two located: %o#', key, locatedDirs);
+        ylog.fatal('#%s files directory should be in one directory, %d located: %o#',
+          key, locatedDirs.length, locatedDirs);
         throw new Error(key + ' files not in one directory');
     }
   });

@@ -107,6 +107,15 @@ CSS 的处理方式也类似
 
 ```
 
+```html
+只用 bower 中的 es5-shim 和 json3 模块
+<!-- concat:/scripts/lib.js __bower+es5-shim+json3 -->
+```
+
+```html
+用所有的 bower，但排除 es5-shim 和 json3 模块（ = 表示排除，因为 - 可能包含在文件名中，所以不能用）
+<!-- concat:/scripts/lib.js __bower=es5-shim=json3 -->
+```
 
 ### SASS 处理
 
