@@ -1,10 +1,12 @@
 # post-web
 [![NPM version](https://badge.fury.io/js/post-web.svg)](https://npmjs.org/package/post-web)
 [![GitHub version][git-tag-image]][project-url]
-[![Dependency Status][daviddm-url]][daviddm-image] <!--
+[![Dependency Status][daviddm-url]][daviddm-image] 
+<!--
 [![Build Status][travis-image]][travis-url]
 [![Code Climate][climate-image]][climate-url]
-[![Coverage Status][coveralls-image]][coveralls-url] -->
+[![Coverage Status][coveralls-image]][coveralls-url] 
+-->
 
 
 __在项目根目录上运行 `pweb`，自动分析文件结构，同时：__
@@ -16,13 +18,12 @@ __在项目根目录上运行 `pweb`，自动分析文件结构，同时：__
 - 支持 图片/字体/代码 的压缩
 - 支持 字体文件自动根据 ttf 字体生成其它三类的字体：eot, svg 和 woff
 - 支持启动 express 服务器，并启动 livereload（自动分配可以用的端口，一般不会出现端口被占用的情况）
-- 支持在项目目录下设置 `{pweb,postweb,post-web}rc.{json,js,}` pattern 的配置文件（可以配置哪些选项可以查看[options.js](./src/options.js)）
+- 支持在项目目录下设置 `pwebrc.{json,js}` pattern 的配置文件（可以配置哪些选项可以查看[options.js](./src/options.js)）
 <!-- - 支持 将 ttf 字体生成 css：主要作用是生成 iconfont -->
 
 
 __缺点：__
 
-- 不支持打包（可以考虑用 grunt 或 gulp 打包 post-web 生成后的代码）
 - 不支持具体业务逻辑的处理（同样具体业务逻辑可以考虑处理 post-web 生成后的代码）
 
 
@@ -37,8 +38,8 @@ __TODO:__
 
 * 在复制图片文件到 dist 目录时， compass 在编译后会把之前生成的 sprite 文件删除，所以会导致要复制的图片文件没找到
 * 添加 lint
-* 添加编译某些应用（已经支持 concat）
-* 添加 hash
+* 添加编译某些应用（已经支持 concat, angular minify）
+* 添加 hash (上传的时候再 hash ?)
 * 完善我的 sass 库
 
 
