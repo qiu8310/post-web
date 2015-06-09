@@ -1,0 +1,42 @@
+/*
+  text 相关样式
+*/
+
+.text-upper {
+  text-transform: uppercase;
+}
+
+.text-lower {
+  text-transform: lowercase;
+}
+
+.text-cap {
+  text-transform: capitalize;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
+/*
+  Text overflow
+  Requires inline-block or block for proper styling
+*/
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/*
+  CSS image replacement
+*/
+.text-hide {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}

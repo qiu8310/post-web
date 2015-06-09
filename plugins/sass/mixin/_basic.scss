@@ -28,6 +28,7 @@
   &::-webkit-input-placeholder  { color: $color; } // Safari and Chrome
 }
 
+
 // User select
 // For selecting text on the page
 
@@ -68,4 +69,19 @@
   &:after {
     clear: both;
   }
+}
+
+
+@mixin selection() {
+  ::selection { @content; }
+  ::-moz-selection { @content; }
+  ::-webkit-selection { @content; }
+}
+
+@mixin text-hide() {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
 }

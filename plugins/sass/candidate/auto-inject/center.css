@@ -1,0 +1,79 @@
+/*
+  居中相关
+*/
+
+
+/*
+
+  Reference: http://css-tricks.com/centering-css-complete-guide/
+
+  垂直居中( inline )
+  1、单行文字垂直居中
+    a. 设置相等的 padding-top 和 padding-bottom
+    b. 设置 line-height 为容器的高度
+
+  2、多行文字垂直居中
+    a. 同样可以用相等的 padding-top 和 padding-bottom
+    b. 用 { display: table-cell; vertical-align: middle; }
+    c. 用 { display: flex; justify-content: center; flex-direction: column;
+
+
+  垂直居中( block )
+  1、height 已知 （水平居中也类似）
+    a. 利用绝对定位，top 设置为 50%，margin-top 设置为负的 height 的一半
+  2、height 未知 （水平居中也类似）
+    a. 同样是绝对定位，top 为 50%，最后就用 transform: translateY(-50%);
+  3、用 flex
+    a. { display: flex; justify-content: center; flex-direction: column; } }
+
+
+  垂直水平居中
+  1、width height 已知 （与上面类似）
+  2、width height 未知 （与上面类似）
+  3、用 flex
+    a. { display: flex; justify-content: center; align-items: center; }
+
+*/
+
+
+/*
+  水平居中当前元素
+*/
+.center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/*
+  用 flex 让元素的子元素垂直居中对齐
+*/
+.hv-center-child {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/*
+  使用下面的需要把它们的父元素的 position 设置成 relative
+*/
+.h-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.v-center {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hv-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

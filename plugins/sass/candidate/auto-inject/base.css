@@ -1,0 +1,78 @@
+/*
+  隐藏元素
+*/
+.hidden {
+  display: none !important;
+}
+
+.invisible {
+  visibility: hidden !important;
+}
+
+
+/*
+ 触发硬件加速
+ With hardware acceleration supported and enabled, animated translation, rotation, scaling and opacity will definitely be smoother with GPU compositing.
+*/
+.hw-accelerate {
+  transform: translateZ(0);
+}
+
+
+
+/* Prevent the callout menu appearing in iOS Safari when the user performs tap & hold */
+.no-callout {
+  -webkit-touch-callout: none; /* 禁止浏览器弹出保存图片类似的界面 */
+}
+
+/*
+  禁止选择，对 input 输入框无效
+  禁止用户选择文字，不禁止的话，用户在手机上点击的话，很容易选择上上面的文字
+*/
+.no-select {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+/* 强制文本换行 */
+.break-word, .break-word td, .break-word th {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+table.break-word {
+  table-layout: fixed;
+}
+
+
+
+/* 浮动与清除浮动 */
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+/*
+  pull-clear
+  Source: http://nicolasgallagher.com/micro-clearfix-hack/
+
+  For modern browsers
+  1. The space content is one way to avoid an Opera bug when the
+      contentEditable attribute is included anywhere else in the document.
+      Otherwise it causes space to appear at the top and bottom of elements
+      that are clearfixed.
+  2. The use of `table` rather than `block` is only necessary if using
+      `:before` to contain the top-margins of child elements.
+*/
+.pull-clear:before, .pull-clear:after {
+  content: " "; /* 1 */
+  display: table; /* 2 */
+}
+.pull-clear:after {
+  clear: both;
+}
