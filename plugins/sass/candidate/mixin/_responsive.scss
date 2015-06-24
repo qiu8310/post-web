@@ -1,20 +1,20 @@
-@mixin mobile() {
-  @media only screen and (max-width: $mobile-max-width) {
+@mixin phone() {
+  @media only screen and (max-width: $phone-max-width) {
     @content;
   }
 }
-@mixin no-mobile() {
-  @media only screen and (min-width: $mobile-max-width + 1) {
+@mixin no-phone() {
+  @media only screen and (min-width: $phone-max-width + 1) {
     @content;
   }
 }
 @mixin tablet() {
-  @media only screen and (min-width: $mobile-max-width + 1) and (max-width: $tablet-max-width) {
+  @media only screen and (min-width: $phone-max-width + 1) and (max-width: $tablet-max-width) {
     @content;
   }
 }
 @mixin no-tablet() {
-  @media only screen and (max-width: $mobile-max-width ), only screen and (min-width: $tablet-max-width + 1) {
+  @media only screen and (max-width: $phone-max-width ), only screen and (min-width: $tablet-max-width + 1) {
     @content;
   }
 }
@@ -30,18 +30,18 @@
 }
 
 
-.mobile, .no-mobile, .tablet, .no-tablet, .desktop, .no-desktop {
+.phone, .no-phone, .tablet, .no-tablet, .desktop, .no-desktop {
   display: none;
 }
 
-.mobile {
-  @include mobile {
+.phone {
+  @include phone {
     display: block;
   }
 }
 
-.no-mobile {
-  @include no-mobile {
+.no-phone {
+  @include no-phone {
     display: block;
   }
 }

@@ -115,7 +115,6 @@ describe('postSass', function () {
         'dist/styles/sub < 2',
         'dist/scripts/babel.js',
         'dist/scripts/coffee.js',
-        'dist/scripts/iced.js',
         'dist/scripts/js.js',
         'dist/scripts/ts.js',
         'dist/images/grid.png',
@@ -139,7 +138,6 @@ describe('postSass', function () {
         'dist/styles < 6',
         'dist/scripts/all.js',
         'dist/scripts/coffee.js',
-        'dist/scripts/iced.js',
         'dist/images/grid.png',
         'dist/images/course < 2',
         'dist/images/gen/course < 1'

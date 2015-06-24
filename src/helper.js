@@ -161,14 +161,14 @@ var helper = {
     if (!file) { return false; }
 
     var target;
-    var found = file === true ? '**/*.{html,htm}' : file;
-    _.each([].concat(dirs), function(dir) {
-      _.each(helper.findFilesByPattern(path.join(dir, found)), function(f) {
-        target = path.relative(dir, f);
-        return false;
-      });
-      if (target) { return false; }
-    });
+    //var found = file === true ? '**/*.{html,htm}' : file;
+    //_.each([].concat(dirs), function(dir) {
+    //  _.each(helper.findFilesByPattern(path.join(dir, found)), function(f) {
+    //    target = path.relative(dir, f);
+    //    return false;
+    //  });
+    //  if (target) { return false; }
+    //});
 
     xopen(host + '/' + (target || (file === true ? '' : file)));
   },

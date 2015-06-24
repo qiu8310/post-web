@@ -253,8 +253,32 @@
 @function slice($list, $start: 1, $end: length($list)) {
   $result: ();
 
+  @if length($list) < 1 or $start > $end {
+    @return $result;
+  }
+
   @for $i from $start through $end {
     $result: append($result, nth($list, $i), list-separator($list));
+  }
+
+  @return $result;
+}
+
+@function flatten($list) {
+  $result: ();
+
+  @each $item in $list {
+    @if length($item) > 1 {
+      $flatten: flatten($item);
+
+      @each $i in $flatten {
+        $result: append($result, $i, list-separator($list));
+      }
+    }
+
+    @else {
+      $result: append($result, $item, list-separator($list));
+    }
   }
 
   @return $result;

@@ -29,6 +29,7 @@ __缺点：__
 
 __NOTE:__
 
+* 支持 SourceMap
 * 所有以 _ 开头的文件都会当作 partial，不会编译
 * watch 过程中不要修改原有资源的文件夹名称（因为这些资源文件夹第一次初始化之后在程序中就不会变了）
 * 除了 scripts/styles/templates/images/fonts 之外的其它文件（如 .txt），只有在 production 环境下才会拷贝到 distDir
@@ -36,11 +37,13 @@ __NOTE:__
 
 __TODO:__
 
+* 支持 DEBUG 模式（发布时，自动去除 DEBUG 代码）
 * 在复制图片文件到 dist 目录时， compass 在编译后会把之前生成的 sprite 文件删除，所以会导致要复制的图片文件没找到
 * 添加 lint
 * 添加编译某些应用（已经支持 concat, angular minify）
 * 添加 hash (上传的时候再 hash ?)
 * 完善我的 sass 库
+* 参考 fis, http://amokjs.com/, https://github.com/broccolijs/broccoli
 
 
 ## Usage

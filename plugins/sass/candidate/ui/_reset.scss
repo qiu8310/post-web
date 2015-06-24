@@ -54,11 +54,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-fieldset, img {
-  border: none;
-  outline: none;
-}
-
 ins, a {
   text-decoration: none;
   cursor: pointer;
@@ -70,12 +65,92 @@ a {
   outline: none !important;
 }
 
+
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+
+form {
+  margin: 0;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+
+legend {
+  border: 0;
+  padding: 0;
+  white-space: normal;
+  *margin-left: -7px;
+}
+
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+  *vertical-align: middle;
+}
+
+button,
+input {
+  line-height: normal;
+}
+
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  cursor: pointer;
+}
+
+button[disabled],
+input[disabled] {
+  cursor: default;
+}
+
+
+input[type="checkbox"],
+input[type="radio"] {
+  padding: 0;
+}
+
+input[type="search"] {
+  -webkit-appearance: textfield;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
 // 去掉 moz 按钮边上的光环
 button::-moz-focus-inner,
 input::-moz-focus-inner {
   padding: 0;
   border: 0;
 }
+
+textarea {
+  overflow: auto;
+  vertical-align: top;
+}
+
 
 
 // 禁止对 btn 上的文字选择
@@ -87,10 +162,17 @@ button, .button, .btn {
 }
 
 
-input[type=search]::-webkit-search-cancel-button,
-input[type=search]::-webkit-search-decoration {
-  -webkit-appearance: none;
+audio,
+canvas,
+video {
+  display: inline-block;
 }
-input[type=search] {
-  -webkit-appearance: none;
+
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+[hidden] {
+  display: none;
 }

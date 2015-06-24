@@ -1,0 +1,8 @@
+@import "../basic";
+
+
+@include media(">=350px", "<tablet") {
+  body {
+    color: red;
+  }
+}

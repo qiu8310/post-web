@@ -63,15 +63,14 @@ http://hugogiraudel.com/2014/01/27/casting-types-in-sass/
   @return zip($indexes, $list);
 }
 
-@function _to-number-length($number, $unit) {
+@function _to-number-helper($number, $unit) {
   // the variable are put on _setting.scss
   $number-suffixes: 'px' 'cm' 'mm' '%' 'ch' 'pica' 'in' 'em' 'rem' 'pt' 'pc' 'ex' 'vw' 'vh' 'vmin' 'vmax';
   $number-units:   1px  1cm  1mm  1%  1ch  1pica  1in  1em  1rem  1pt  1pc  1ex  1vw  1vh  1vmin  1vmax;
   $index: index($number-suffixes, $unit);
 
   @if not $index {
-    @warn "Unknown unit `#{$unit}`.";
-    @return false;
+    @error "Unknown unit `#{$unit}`.";
   }
 
   @return $number * nth($number-units, $index);
@@ -128,7 +127,7 @@ sass {
     @else {
       @if not $index {
         $result: if($minus, $result * -1, $result);
-        @return _to-number-length($result, str-slice($string, $i));
+        @return _to-number-helper($result, str-slice($string, $i));
       }
 
       $number: nth($numbers, $index);
