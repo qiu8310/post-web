@@ -1,10 +1,7 @@
-@mixin mp($margin: false, $padding: false) {
-  @if $margin != false {
-    margin: $margin;
-  }
-  @if $padding != false {
-    padding: $padding;
-  }
+// 如果是 null，sass 会忽略此项（只能用在 mixin 中）
+@mixin mp($margin: null, $padding: null) {
+  margin: $margin;
+  padding: $padding;
 }
 
 // Optional hyphenation
