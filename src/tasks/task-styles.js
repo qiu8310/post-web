@@ -123,7 +123,7 @@ module.exports = require('./task-base').extend({
       function(err, data) {
 
         // 删除 .sass-cache 文件
-        fs.removeSync('.sass-cache');
+        // fs.removeSync('.sass-cache');  // 人工删除此文件会导致 compass 编译报错
 
         // 恢复 bootstrap
         // boot.recover();
