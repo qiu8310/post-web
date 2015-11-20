@@ -73,7 +73,7 @@ function postWeb(dir, commands, options) {
   }
 
   if (options.angular === null) {
-    options.angular = bkg.dependencies && bkg.dependencies.angular;
+    options.angular = bkg.dependencies && bkg.dependencies.angular || pkg.dependencies && pkg.dependencies.angular;
     if (options.angular) {
       ylog.info('detect this is a angular project, angular version ^%s^', options.angular);
     }
