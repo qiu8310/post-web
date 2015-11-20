@@ -96,6 +96,25 @@ __下面指定的版本号只是我系统上安装过没问题的版本，不代
 * haml        - 系统需要安装 haml 4.0.* (`gem install haml`)
 
 
+### 配置支持 `proxy` 和 `rewrite`
+
+在 JSON 配置的最外层添加 proxy 和 rewrite 两个属性即可
+
+* [proxy 是一个对象]
+  ```js
+  "proxy": {
+    '/api': 'http://other.domain.com'
+  }
+  ```
+* [rewrite 是一个数组（其实 rewrite 模块也支持 proxy)](https://www.npmjs.com/package/connect-modrewrite)
+  ```js
+  "rewrite": [
+    "^/blog/(.*) /$1",
+    "^/blog/(.*) - [L]",  // A dash indicates that no substitution should be performed.
+    "^/test/proxy/(.*)$ http://nodejs.org/$1 [P]"  // P means Proxy
+  ]
+  ```
+
 
 ### HTML 中的 concat 语法
 

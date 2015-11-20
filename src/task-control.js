@@ -222,7 +222,35 @@ _.assign(TaskControl.prototype, {
     require('./server/express-app')(opts, function(app, serOpts) {
 
       self.lr = app.lr;
-      this.modRewrite = require('connect-modrewrite');
+
+      var express = this;
+
+      // 处理 proxy
+      var proxyOpts = self.options.proxy || self.options.server.proxy;
+      if (proxyOpts) {
+        var modProxy = express.modProxy = require('express-http-proxy');
+        if (_.isPlainObject(proxyOpts)) {
+          _.each(proxyOpts, function (target, pathPrefix) {
+            app.use(pathPrefix, modProxy(target, {
+              forwardPath: function(req, res) {
+                ylog.info('proxy to: ^%s%s^', target, pathPrefix + req.url);
+                return pathPrefix + req.url;
+              }
+            }));
+          });
+        }
+      }
+
+
+      // 处理 rewrite
+      var rewriteOpts = self.options.rewrite || self.options.server.rewrite;
+      if (rewriteOpts) {
+        var modRewrite = express.modRewrite = require('connect-modrewrite');
+        if (_.isArray(rewriteOpts)) {
+          app.use(modRewrite(rewriteOpts));
+        }
+      }
+
 
       self.options.server.handler.call(this, app, serOpts, self.options);
 
@@ -240,9 +268,8 @@ _.assign(TaskControl.prototype, {
 
 
       // 这个放在最后，因为此 middle ware 是会终止的，不会继续向下执行
-      // this === require('express')
-      app.use(this.static(distDir));
-      app.use(this.static(assetDir));  // 以免有些文件没有移进来
+      app.use(express.static(distDir));
+      app.use(express.static(assetDir));  // 以免有些文件没有移进来
 
       // 也可以加上前缀
       // app.use('/static', express.static('public'));
