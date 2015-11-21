@@ -7,13 +7,20 @@
  */
 var Uglify = require('uglify-js');
 var path = require('path');
+var _ = require('lodash');
+var fs = require('fs-extra');
 var ngAnnotate = require('ng-annotate');
+var ylog = require('ylog')('post:scripts');
 
 module.exports = require('./task-base').extend({
 
   init: function() {
     // uglify 配置
     this.taskOpts.uglify.fromString = true;
+
+    if (this.options.webpack) {
+      this.enables.webpack = true;
+    }
   },
 
 
@@ -52,6 +59,64 @@ module.exports = require('./task-base').extend({
     }
   },
 
+
+  getDistFile: function(file, ext) {
+    var dist = this.options.webpack ? this.tmp : this.dist;
+    file = path.join(dist, path.relative(this.src, file.replace(this.tmp, this.src)));
+    return this._getFile(file, ext);
+  },
+
+  compileWebpack: function (done) {
+    var opts = this.options;
+    var wpOpts = opts.webpack;
+    var webpack = require('webpack');
+
+    var production = this.options.production;
+
+    var injectVariables = _.assign({
+      __PROD__: production,
+      __DEV__: !production
+    }, wpOpts.injectVariables);
+    _.each(injectVariables, function (val, key) {
+      injectVariables[key] = JSON.stringify(val);
+    });
+    var stats = _.assign({
+      errors: true,
+      warnings: true,
+      assets: true,
+      colors: true,
+      hash: false,
+      timings: true,
+      chunks: false,
+      chunkModules: false,
+      modules: false
+    }, wpOpts.stats);
+
+    wpOpts.context = this.tmp;
+    if (!wpOpts.output) {
+      wpOpts.output = { filename: '[name].js' };
+    }
+    if (!wpOpts.resolve) {
+      wpOpts.resolve = {};
+    }
+    if (!wpOpts.plugins) {
+      wpOpts.plugins = [];
+    }
+
+    wpOpts.plugins.push(new webpack.DefinePlugin(injectVariables));
+    if (this.minify) {
+      wpOpts.plugins.push(new webpack.optimize.UglifyJsPlugin({compressor: {warnings: false}}));
+    }
+
+    wpOpts.resolve.modulesDirectories = [path.join(opts.projectDir, 'node_modules')];
+    wpOpts.output.path = this.dist;
+
+    webpack(wpOpts, function (err, out) {
+      console.log('\n\nWebpack stats: \n\n%s\n', out.toString(stats));
+      done(err);
+    });
+  },
+
   //postCompile: function(data, cfg) {
   //  return data;
   //},
@@ -87,12 +152,31 @@ module.exports = require('./task-base').extend({
   },
 
   compile: function(done) {
-    this.runParallel('compile', ['js', 'babel', 'coffee', 'iced', 'typescript'], function(err) {
+    var fn = 'runParallel',
+      tasks = ['js', 'babel', 'coffee', 'iced', 'typescript'];
+
+    if (this.enables.webpack) {
+      fn = 'runSeriesParallel';
+      tasks = [tasks, 'webpack'];
+    }
+
+    if (this.enables.webpack) {
+      fs.ensureDirSync(this.tmp);
+    }
+
+    this[fn]('compile', tasks, function (err) {
       if (!err && this.production) {
         this.concat();
+      }
+
+      if (this.enables.webpack) {
+        ylog.info('remove directory ^%s^', this.tmp);
+        fs.removeSync(this.tmp);
       }
       done(err);
     });
   }
+
+
 
 });

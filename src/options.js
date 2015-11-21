@@ -115,11 +115,13 @@ var options = {
     },
     scripts: {
       uglify: {
-        warnings: true,
+        warnings: false,
         mangle: true,
-        compress: {}
+        compress: {
+          'drop_console': true
+        }
       },
-      babel: { ast: false },
+      babel: { ast: false, stage: 0 },
       coffee: {},
       typescript: {
         //module: 'commonjs' // commonjs 或 amd
@@ -141,17 +143,17 @@ var options = {
         compileDebug: false,
         pretty: true, // 永远都是 true，要压缩统一用 htmlMinifier
         data: {
-          title: 'Jade - POST WEB'
+          //title: 'Jade - POST WEB'
         }
       },
       slim: {
         data: {
-          title: 'Slim - POST WEB'
+          //title: 'Slim - POST WEB'
         }
       },
       haml: {
         data: {
-          title: 'Haml - POST WEB'
+          //title: 'Haml - POST WEB'
         }
       }
     },

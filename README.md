@@ -37,13 +37,14 @@ __NOTE:__
 
 __TODO:__
 
-* 支持 DEBUG 模式（发布时，自动去除 DEBUG 代码）
-* 在复制图片文件到 dist 目录时， compass 在编译后会把之前生成的 sprite 文件删除，所以会导致要复制的图片文件没找到
-* 添加 lint
-* 添加编译某些应用（已经支持 concat, angular minify）
-* 添加 hash (上传的时候再 hash ?)
-* 完善我的 sass 库
-* 参考 fis, http://amokjs.com/, https://github.com/broccolijs/broccoli
+* [ ] 支持 DEBUG 模式（发布时，自动去除 DEBUG 代码）
+* [ ] 在复制图片文件到 dist 目录时， compass 在编译后会把之前生成的 sprite 文件删除，所以会导致要复制的图片文件没找到
+* [ ] 添加 lint
+* [ ] 添加编译某些应用（已经支持 concat, angular minify）
+* [ ] 添加 hash (上传的时候再 hash ?)
+* [ ] 完善我的 sass 库
+* [ ] 参考 fis, http://amokjs.com/, https://github.com/broccolijs/broccoli
+* [ ] 支持 swig 模板
 
 
 ## Usage
@@ -114,6 +115,15 @@ __下面指定的版本号只是我系统上安装过没问题的版本，不代
     "^/test/proxy/(.*)$ http://nodejs.org/$1 [P]"  // P means Proxy
   ]
   ```
+
+### 支持配置 `webpack`
+
+**注意只会用它来打包 JS**
+
+可配置项除了默认的外，还支持：
+
+- injectVariables: 默认有 \__PROD__ 和 \__DEV__ 两个变量
+- stats
 
 
 ### HTML 中的 concat 语法

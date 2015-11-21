@@ -86,9 +86,9 @@ module.exports = require('./task-base').extend({
     var browsers = [],// autoprefixer => https://github.com/ai/browserslist
       compat = {}; // cleanCss 的兼容属性
     if (options.mobile) {
-      browsers = ['last 2 versions', 'Android >= 20', 'Chrome >= 20'];
+      browsers = ['last 2 versions', 'Android >= 2.3', 'Chrome >= 34', 'Firefox >= 28'];
     } else {
-      browsers = ['last 10 versions', 'Chrome >= 20', 'Android >= 20', 'Firefox >= 20'];
+      browsers = ['last 10 versions', 'Chrome >= 24', 'Firefox >= 20'];
       compat.compatibility = [
         'ie8',
         '+properties.backgroundSizeMerging',

@@ -15,6 +15,7 @@ var htmlMinifier = require('html-minifier').minify,
   markdown = require('markdown').markdown,
   jade = require('jade');
 
+var nodeModulesPattern = /^(node_modules|__nm)\//;
 
 module.exports = require('./task-base').extend({
 
@@ -207,6 +208,7 @@ module.exports = require('./task-base').extend({
   // 同时给 html 添加上 script 或 style 标签
   postCompileConcat: function(content, cfg) {
     var self = this, opts = self.options;
+    var nm = path.join(opts.projectDir, 'node_modules');
 
     return content.replace(self.concatPattern, function(raw, space, target, files) {
       var ext = target.split('.').pop();
@@ -226,6 +228,10 @@ module.exports = require('./task-base').extend({
           self.ylog.debug('%s bower files', ext, bowerFiles);
           [].push.apply(concatFiles, bowerFiles);
           [].push.apply(showFiles, bowerFiles);
+        } else if (nodeModulesPattern.test(f)) {
+          var nmRelative = f.replace(nodeModulesPattern, '');
+          showFiles.push(nmRelative);
+          concatFiles.push(path.join(nm, nmRelative));
         } else {
           var srcObj = self._normalizeConcatSrc(task, self.appendExt(f, ext), cfg);
           showFiles.push(srcObj.show);
@@ -282,7 +288,7 @@ module.exports = require('./task-base').extend({
       scriptContent = scriptContent.replace(re, function(raw, src) {
         raw = tag;
         tag = '';
-        concatFiles.push(src);
+        concatFiles.push(src.replace(nodeModulesPattern, ''));
         return raw;
       });
       self.addConcatFiles(task, targetObj.concat, concatFiles);

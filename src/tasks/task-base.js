@@ -427,6 +427,11 @@ module.exports = require('class-extend').extend({
     _.each(this.taskOpts.concat, function(files, target) {
       files = _.map(files, function(f) {
         f = self.appendExt(f);
+
+        if (h.isFile(f)) {
+          return path.resolve(f);
+        }
+
         var dir = _.find(dirs, function(dir) {
           return h.isFile(dir, f);
         });

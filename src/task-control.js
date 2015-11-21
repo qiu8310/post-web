@@ -270,6 +270,7 @@ _.assign(TaskControl.prototype, {
       // 这个放在最后，因为此 middle ware 是会终止的，不会继续向下执行
       app.use(express.static(distDir));
       app.use(express.static(assetDir));  // 以免有些文件没有移进来
+      app.use(express.static(path.join(self.options.projectDir, 'node_modules')));
 
       // 也可以加上前缀
       // app.use('/static', express.static('public'));
