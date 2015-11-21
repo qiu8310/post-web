@@ -13,6 +13,7 @@ var wiredep = require('wiredep');
 
 var htmlMinifier = require('html-minifier').minify,
   markdown = require('markdown').markdown,
+  swig  = require('swig'),
   jade = require('jade');
 
 var nodeModulesPattern = /^(node_modules|__nm)\//;
@@ -87,11 +88,22 @@ module.exports = require('./task-base').extend({
     }
   },
 
+  initSwig: function(swigOpts) {
+    swigOpts.locals = swigOpts.locals || swigOpts.data;
+    delete swigOpts.data;
+    swig.setDefaults(swigOpts);
+  },
+
   asyncCompileUnits: {
     jade: function(data, cfg, cb) {
       var opts = this.taskOpts.jade;
       opts.filename = cfg.src;
       cb(null, jade.render(data, opts));
+    },
+    swig: function(data, cfg, cb) {
+      var opts = this.taskOpts.swig;
+      opts.filename = cfg.src;
+      cb(null, swig.render(data, opts));
     },
     markdown: function(data, cfg, cb) {
       cb(null, markdown.toHTML(data));
@@ -307,7 +319,7 @@ module.exports = require('./task-base').extend({
 
 
   compile: function(done) {
-    this.runParallel('compile', ['markdown', 'jade', 'slim', 'haml', 'html'], done);
+    this.runParallel('compile', ['markdown', 'jade', 'slim', 'swig', 'haml', 'html'], done);
   }
 
 });

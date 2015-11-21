@@ -1,7 +1,7 @@
 {
   "name": "post-web",
   "description": "Process web source file to deployable file.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/qiu8310/post-web",
   "bugs": "https://github.com/qiu8310/post-web/issues",
   "license": "MIT",
@@ -50,6 +50,7 @@
     "postcss": "^4.1.10",
     "postcss-colormin": "^1.2.3",
     "pretty-bytes": "^1.0.4",
+    "swig": "^1.4.2",
     "tiny-lr": "^0.1.5",
     "typescript": "^1.5.0-beta",
     "uglify-js": "^2.4.23",

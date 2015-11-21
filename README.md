@@ -44,7 +44,6 @@ __TODO:__
 * [ ] 添加 hash (上传的时候再 hash ?)
 * [ ] 完善我的 sass 库
 * [ ] 参考 fis, http://amokjs.com/, https://github.com/broccolijs/broccoli
-* [ ] 支持 swig 模板
 
 
 ## Usage

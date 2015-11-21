@@ -40,7 +40,7 @@ var options = {
     styles: ['css', 'sass', 'scss', 'less', 'styl'],
     scripts: ['js', 'jsx', 'coffee', 'iced', 'ts'],
 
-    templates: ['html', 'htm', 'jade', 'slim', 'haml'],
+    templates: ['html', 'htm', 'jade', 'slim', 'haml', 'swig'],
 
     // fonts 和 images 中都可能含有 svg 文件，所以两处都不要写它
     images: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
@@ -82,7 +82,7 @@ var options = {
     },
     templates: {
       enabled: true,
-      types: ['markdown', 'jade', 'slim', 'haml', 'html'],
+      types: ['markdown', 'jade', 'slim', 'haml', 'swig', 'html'],
       finalExtension: 'html'
     },
     images: {
@@ -154,6 +154,11 @@ var options = {
       haml: {
         data: {
           //title: 'Haml - POST WEB'
+        }
+      },
+      swig: {
+        data: {
+          //title: 'Swig - POST WEB'
         }
       }
     },
