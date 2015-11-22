@@ -17,10 +17,6 @@ module.exports = require('./task-base').extend({
   init: function() {
     // uglify 配置
     this.taskOpts.uglify.fromString = true;
-
-    if (this.options.webpack) {
-      this.enables.webpack = true;
-    }
   },
 
 
@@ -153,14 +149,14 @@ module.exports = require('./task-base').extend({
 
   compile: function(done) {
     var fn = 'runParallel',
-      tasks = ['js', 'babel', 'coffee', 'iced', 'typescript'];
+      tasks = ['js', 'babel', 'coffee', 'iced', 'typescript'],
+      enableWebpack = this.options.webpack;
 
-    if (this.enables.webpack) {
+    if (enableWebpack) {
       fn = 'runSeriesParallel';
       tasks = [tasks, 'webpack'];
-    }
 
-    if (this.enables.webpack) {
+      this.enables.webpack = true;
       fs.ensureDirSync(this.tmp);
     }
 
@@ -169,7 +165,7 @@ module.exports = require('./task-base').extend({
         this.concat();
       }
 
-      if (this.enables.webpack) {
+      if (enableWebpack) {
         ylog.info('remove directory ^%s^', this.tmp);
         fs.removeSync(this.tmp);
       }
