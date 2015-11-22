@@ -8,7 +8,10 @@
 
 var path = require('path'),
   _ = require('lodash'),
-  gaze = require('gaze');
+  chokidar = require('chokidar');
+  // gaze 在监听文件夹到查看文件夹内容之间会有个间隙，如果在这个间隙内文件夹被删除，程序就会出错
+  // gaze = require('gaze');
+
 
 var ylog = require('ylog')('post:watch');
 
@@ -24,16 +27,17 @@ var ignores = [];
  * @param {Function} cb
  */
 function watch (dirs, opts, cb) {
-  var gazePattern = [].concat(dirs).map(function(dir) {
+  var watchPattern = [].concat(dirs).map(function(dir) {
     return path.join(dir, '**/*.*');
   });
 
   opts = _.assign({
     interval: 400,
+    ignored: '.tmp-*',
     debounceDelay: 600
   }, opts);
 
-  ylog.debug('watch %o', gazePattern);
+  ylog.debug('watch %o', watchPattern);
   ylog.debug('watch options', opts);
 
 
@@ -44,29 +48,39 @@ function watch (dirs, opts, cb) {
       files.length = 0; // 清空数组
     }, opts.debounceDelay - 200);
 
-  gaze(gazePattern, opts, function(err) {
+  var watcher = chokidar.watch(watchPattern, opts);
+    // gaze: changed/added/deleted
+    // chokidar: add/change/unlink/addDir/unlinkDir/ready/error/raw
 
-    // On changed/added/deleted
-    this.on('all', function(event, file) {
+  var startTime = Date.now();
+  watcher.on('all', function(event, file) {
+    // 忽略前两秒的文件变化，主要是 chokidar 会将初始化的监听也加上来
+    if (Date.now() - startTime < 2000) return false;
 
-      // 只有第一次忽略，第二次再过来就不忽略了
-      if (_.includes(ignores, file)) {
-        return ignores.splice(ignores.indexOf(file), 1);
-      }
+    if (event === 'add') event = 'added';
+    else if (event === 'change') event = 'changed';
+    else if (event === 'unlink') event = 'deleted';
+    else {
+      ylog.info('ignore ~%s~ ^%s^', event, file);
+      return false;
+    }
 
-      // dot 开头的文件不需要监听
-      if (!dotFileRe.test(file)) {
-        files.push([event, file]);
-        var md = event === 'changed' ? '&' : (event === 'added' ? '**' : '#');
-        ylog.info('%s%s%s ^%s^', md, event, md, file);
-        handler();
-      }
-    });
+    // 只有第一次忽略，第二次再过来就不忽略了
+    if (_.includes(ignores, file)) {
+      return ignores.splice(ignores.indexOf(file), 1);
+    }
 
-    // 处理错误
-    this.on('error', function(err) { ylog.error(err); });
-    if (err) { ylog.error(err); }
+    // dot 开头的文件不需要监听
+    if (!dotFileRe.test(file)) {
+      files.push([event, file]);
+      var md = event === 'changed' ? '&' : (event === 'added' ? '**' : '#');
+      ylog.info('%s%s%s ^%s^', md, event, md, file);
+      handler();
+    }
   });
+
+  // 处理错误
+  watcher.on('error', function(err) { ylog.error(err); });
 }
 
 watch.addIgnoreFile = function (file) {
