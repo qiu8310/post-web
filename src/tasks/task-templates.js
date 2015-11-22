@@ -90,8 +90,8 @@ module.exports = require('./task-base').extend({
 
   initSwig: function(swigOpts) {
     swigOpts.locals = swigOpts.locals || swigOpts.data;
+    swigOpts.cache = false;
     delete swigOpts.data;
-    swig.setDefaults(swigOpts);
   },
 
   asyncCompileUnits: {
