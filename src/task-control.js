@@ -231,10 +231,21 @@ _.assign(TaskControl.prototype, {
         var modProxy = express.modProxy = require('express-http-proxy');
         if (_.isPlainObject(proxyOpts)) {
           _.each(proxyOpts, function (target, pathPrefix) {
+            ylog.info('proxy listen &%s& => ^%s^', pathPrefix, target);
             app.use(pathPrefix, modProxy(target, {
               forwardPath: function(req, res) {
-                ylog.info('proxy to: ^%s%s^', target, pathPrefix + req.url);
-                return pathPrefix + req.url;
+                var proxyTo;
+                // req.url 首个字母一定是 "/"
+                // 所以当 pathPrefix 已经结束了 path 部分（如 /path/index.php），此变量就会出错
+                // 下面修证它
+                if (req.url[0] === '/' && (pathPrefix.indexOf('?') > 0 || req.url[1] === '?')) {
+                  proxyTo = pathPrefix + req.url.substr(1);
+                } else {
+                  proxyTo = pathPrefix + req.url;
+                }
+
+                ylog.info('proxy to: ^%s%s^', target, proxyTo);
+                return proxyTo;
               }
             }));
           });
@@ -247,6 +258,7 @@ _.assign(TaskControl.prototype, {
       if (rewriteOpts) {
         var modRewrite = express.modRewrite = require('connect-modrewrite');
         if (_.isArray(rewriteOpts)) {
+          ylog.info('rewrite ^%j^', rewriteOpts);
           app.use(modRewrite(rewriteOpts));
         }
       }
