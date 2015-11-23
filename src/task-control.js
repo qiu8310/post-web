@@ -226,11 +226,17 @@ _.assign(TaskControl.prototype, {
       var express = this;
 
       // 处理 proxy
-      var proxyOpts = self.options.proxy || self.options.server.proxy;
-      if (proxyOpts) {
+      var proxies = self.options.proxy || self.options.server.proxy, proxyOpts;
+
+      if (proxies) {
+
         var modProxy = express.modProxy = require('express-http-proxy');
-        if (_.isPlainObject(proxyOpts)) {
-          _.each(proxyOpts, function (target, pathPrefix) {
+
+        if (_.isPlainObject(proxies)) {
+          proxyOpts = proxies.options;
+          delete proxies.options;
+
+          _.each(proxies, function (target, pathPrefix) {
             ylog.info('proxy listen &%s& => ^%s^', pathPrefix, target);
             app.use(pathPrefix, modProxy(target, {
               forwardPath: function(req, res) {
@@ -246,6 +252,16 @@ _.assign(TaskControl.prototype, {
 
                 ylog.info('proxy to: ^%s%s^', target, proxyTo);
                 return proxyTo;
+              },
+              intercept: function(rsp, data, req, res, callback) {
+                // rsp - original response from the target
+                if (proxyOpts.delay) {
+                  setTimeout(function () {
+                    callback(null, data);
+                  }, proxyOpts.delay);
+                } else {
+                  callback(null, data);
+                }
               }
             }));
           });
