@@ -66,6 +66,7 @@ module.exports = require('./task-base').extend({
     var opts = this.options;
     var wpOpts = opts.webpack;
     var webpack = require('webpack');
+    var CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 
     var production = this.options.production;
 
@@ -106,6 +107,33 @@ module.exports = require('./task-base').extend({
 
     wpOpts.resolve.modulesDirectories = [path.join(opts.projectDir, 'node_modules')];
     wpOpts.output.path = this.dist;
+
+    // entry
+    var entry = wpOpts.entry,
+      commonEntry = entry.common,
+      vendorEntry = entry.vendor;
+
+    delete entry.common;
+    delete entry.vendor;
+    if (commonEntry) {
+      if (!_.isPlainObject(commonEntry)) {
+        commonEntry = {};
+      }
+      if (!commonEntry.name) {
+        commonEntry.name = 'common';
+      }
+      if (!commonEntry.minChunks) {
+        commonEntry.minChunks = 2;
+      }
+      wpOpts.plugins.push(new CommonsChunkPlugin(commonEntry));
+    }
+    if (vendorEntry && vendorEntry.length) {
+      entry.vendor = vendorEntry;
+      wpOpts.plugins.push(new CommonsChunkPlugin({
+        name: 'vendor',
+        minChunks: Infinity
+      }));
+    }
 
     webpack(wpOpts, function (err, out) {
       console.log('\n\nWebpack stats: \n\n%s\n', out.toString(stats));
