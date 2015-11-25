@@ -161,9 +161,7 @@
 
     @if not $index {
       $running: false;
-    }
-
-    @else {
+    } @else {
       $slice: str-slice($remaining, 1, $index - 1);
       $result: append($result, $slice, $separator);
       $remaining: str-slice($remaining, $index + str-length($delimiter));
@@ -274,9 +272,7 @@
       @each $i in $flatten {
         $result: append($result, $i, list-separator($list));
       }
-    }
-
-    @else {
+    } @else {
       $result: append($result, $item, list-separator($list));
     }
   }
