@@ -51,6 +51,7 @@
     "postcss": "^4.1.10",
     "postcss-colormin": "^1.2.3",
     "pretty-bytes": "^1.0.4",
+    "rollup": "^0.21.1",
     "swig": "^1.4.2",
     "tiny-lr": "^0.1.5",
     "typescript": "^1.5.0-beta",

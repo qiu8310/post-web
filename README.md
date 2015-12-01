@@ -119,10 +119,26 @@ __下面指定的版本号只是我系统上安装过没问题的版本，不代
 
 **注意只会用它来打包 JS**
 
-可配置项除了默认的外，还支持：
+可配置项除了 webpack 默认的外，还支持：
 
-- injectVariables: 默认有 \__PROD__ 和 \__DEV__ 两个变量
-- stats
+- injectVariables: `Object`, 默认有 \__PROD__ 和 \__DEV__ 两个变量
+- stats: `Object`
+
+### 支持 `rollup`
+
+[配置](https://github.com/rollup/rollup/wiki/JavaScript-API#rolluprollup-options-)
+
+```js
+ rollup: {
+  options: {
+    entry: 'app.js'  // 相对于 js 脚本目录的路径
+  },
+  bundle: {
+    format: 'umd'
+  }
+}
+```
+
 
 
 ### HTML 中的 concat 语法

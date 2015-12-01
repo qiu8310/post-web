@@ -141,6 +141,25 @@ module.exports = require('./task-base').extend({
     });
   },
 
+  compileRollup: function (done) {
+    var opts = this.options;
+    var ruOpts = opts.rollup;
+
+    var initOpts = ruOpts.options || {};
+    var bundleOpts = ruOpts.bundle || {};
+
+    initOpts.entry = path.join(this.src, initOpts.entry || 'index.js');
+    bundleOpts.dest = path.join(this.dist, bundleOpts.dest || path.basename(initOpts.entry));
+
+    require('rollup').rollup(initOpts).then(
+      function (bundle) {
+        bundle.write(bundleOpts);
+        done();
+      },
+      done
+    );
+  },
+
   //postCompile: function(data, cfg) {
   //  return data;
   //},
@@ -178,9 +197,13 @@ module.exports = require('./task-base').extend({
   compile: function(done) {
     var fn = 'runParallel',
       tasks = ['js', 'babel', 'coffee', 'iced', 'typescript'],
-      enableWebpack = this.options.webpack;
+      enableWebpack = this.options.webpack,
+      enableRollup = this.options.rollup;
 
-    if (enableWebpack) {
+    if (enableRollup) {
+      tasks = ['rollup'];
+      this.enables.rollup = true;
+    } else if (enableWebpack) {
       fn = 'runSeriesParallel';
       tasks = [tasks, 'webpack'];
 
@@ -197,8 +220,10 @@ module.exports = require('./task-base').extend({
         ylog.info('remove directory ^%s^', this.tmp);
         fs.removeSync(this.tmp);
       }
+
       done(err);
     });
+
   }
 
 
