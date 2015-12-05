@@ -68,8 +68,7 @@ module.exports = require('./task-base').extend({
     var webpack = require('webpack');
     var CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 
-    var production = this.options.production;
-
+    var production = this.production;
     var injectVariables = _.assign({
       __PROD__: production,
       __DEV__: !production
