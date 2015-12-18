@@ -1,11 +1,11 @@
 # post-web
 [![NPM version](https://badge.fury.io/js/post-web.svg)](https://npmjs.org/package/post-web)
 [![GitHub version][git-tag-image]][project-url]
-[![Dependency Status][daviddm-url]][daviddm-image] 
+[![Dependency Status][daviddm-url]][daviddm-image]
 <!--
 [![Build Status][travis-image]][travis-url]
 [![Code Climate][climate-image]][climate-url]
-[![Coverage Status][coveralls-image]][coveralls-url] 
+[![Coverage Status][coveralls-image]][coveralls-url]
 -->
 
 
@@ -33,6 +33,10 @@ __NOTE:__
 * 所有以 _ 开头的文件都会当作 partial，不会编译
 * watch 过程中不要修改原有资源的文件夹名称（因为这些资源文件夹第一次初始化之后在程序中就不会变了）
 * 除了 scripts/styles/templates/images/fonts 之外的其它文件（如 .txt），只有在 production 环境下才会拷贝到 distDir
+
+__Window 用户注意__
+
+* compass 可能不允许 sass 文件中出现中文，这是你可以通过在 sass 文件头指定 @charset "UTF-8" 来解决，[参考这里](http://jsnwork.kiiuo.com/archives/1723/sass-scss-compass-susy2-ruby-%E8%A7%A3%E6%B1%BA%E4%B8%AD%E6%96%87%E8%A8%BB%E8%A7%A3%E7%99%BC%E7%94%9F%E9%8C%AF%E8%AA%A4)
 
 
 __TODO:__
@@ -199,7 +203,7 @@ a {
 
 支持的简写形式：
 
-* `position: center; width: 200px; height: 100px;` << `left: 50%; margin-left: -100px; ...` 
+* `position: center; width: 200px; height: 100px;` << `left: 50%; margin-left: -100px; ...`
 * `rgba(0, 0, 0, .5)`     << `filter: progid:DXImageTransform.Microsoft.gradient(startColorstr ...`
 * `opacity: .5`           << `filter: alpha(opacity=50)`
 * `display: inline-block` << `*display: inline; *zoom: 1`

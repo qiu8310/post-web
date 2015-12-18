@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 @function map-set($map, $key, $val) {
   @if map-has-key($map, $key) {
     $map: map-remove($map, $key);

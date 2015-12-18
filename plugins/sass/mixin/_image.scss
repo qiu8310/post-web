@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 @mixin image-w($icon, $ratio: 1) {
   width: image-w($icon, $ratio);
 }

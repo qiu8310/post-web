@@ -14,13 +14,17 @@ var fs = require('fs-extra'),
 //var CpsBoot = require('./../lib/compass-bootstrap');
 var ylog = require('ylog')('post:styles');
 
-
 var postcss = require('postcss'),
   CleanCss = require('clean-css'),
   cssgrace = require('cssgrace'),
   cssnext = require('cssnext'),
   colormin = require('postcss-colormin');
 
+var isWin = require('os').platform() === 'win32';
+function slash(str) {
+  if (typeof str !== 'string') return str;
+  return isWin ? str.replace(/\//g, '\\') : str;
+}
 
 module.exports = require('./task-base').extend({
 
@@ -39,27 +43,27 @@ module.exports = require('./task-base').extend({
       taskOpts.compass,
       {
         appDir: '.',
-        javascriptDir: options.src.scripts,
-        sassDir: options.src.styles,
-        cssDir: options.tmp.styles,
-        imagesDir: options.src.images,
-        fontsDir: options.src.fonts,
-        generatedImagesPath: options.src.images ? path.join(options.src.images, 'gen') : false
+        javascriptDir: slash(options.src.scripts),
+        sassDir: slash(options.src.styles),
+        cssDir: slash(options.tmp.styles),
+        imagesDir: slash(options.src.images),
+        fontsDir: slash(options.src.fonts),
+        generatedImagesPath: slash(options.src.images ? path.join(options.src.images, 'gen') : false)
       }
     );
 
     // 其它 compass 相关的配置
     cpsOpts = taskOpts.compass;
 
-    cpsOpts.require = [].concat(cpsOpts.require || []);
-    cpsOpts.importPath = [].concat(cpsOpts.importPath || []);
+    cpsOpts.require = [].concat(cpsOpts.require || []).map(slash);
+    cpsOpts.importPath = [].concat(cpsOpts.importPath || []).map(slash);
 
 
     // 加载 plugins 中的插件
     var pluginDir = path.resolve(__dirname, '../../plugins');
     var mySassExtensions = glob.sync(path.join(pluginDir, 'extensions/**/*.rb'));
     ['compass/import-once/activate', 'ceaser-easing'].concat(mySassExtensions).forEach(function(req) {
-      cpsOpts.require.push(req);
+      cpsOpts.require.push(slash(req));
     });
 
 

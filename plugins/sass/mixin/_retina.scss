@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 // 只需要在同一目录下放一个 xxx.png 和一个 xxx@2x.png 的文件
 // 然后调用 bg-retina(xxx), bg-retina(...)
 // 最后调用 retina-dump 就行了

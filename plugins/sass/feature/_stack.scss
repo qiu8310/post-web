@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 // $some-stack: ((group: red, status: dark, value: red), (group: red, status: light, value: '#a00'));
 // stack-helper($some-stack, (group: red, status: dark));
 @function stack-helper($stack, $attributes-map, $key: false) {

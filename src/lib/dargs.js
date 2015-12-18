@@ -16,9 +16,13 @@
 module.exports = function (input, opts) {
   var args = [],
     createArg = function (key, val) {
-      key = '--' + key.replace(/[A-Z]/g, '-$&').toLowerCase();
+      if (key.length === 1) {
+        key = '-' + key;
+      } else {
+        key = '--' + key.replace(/[A-Z]/g, '-$&').toLowerCase();
+      }
 
-      if (opts.noEqual) {
+      if (opts.noEqual || key.length === 2) {
         args.push(key);
         if (val) {
           args.push(val);
@@ -46,7 +50,6 @@ module.exports = function (input, opts) {
 
     } else if (val === false && opts.autoPrefixNo) {
       createArg('no-' + key);
-
     } else if (typeof val === 'string') {
       createArg(key, val);
 

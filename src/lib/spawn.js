@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
  */
 
-var spawn = require('cross-spawn');
+// var spawn = require('cross-spawn');
 var _ = require('lodash');
 var ylog = require('ylog')('post:spawn');
 
@@ -32,7 +32,8 @@ module.exports = function(args, options, done) {
   var cmd = args.join(' ');
   ylog.debug('executing ^%s^', cmd);
 
-  var child = spawn(args.shift(), args, {
+  // var child = spawn(args.shift(), args, {
+  var child = require('child_process').execFile(args.shift(), args, {
     env: options.env,
     cwd: options.cwd,
     stdio: options.stdio

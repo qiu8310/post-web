@@ -1,3 +1,5 @@
+@charset "UTF-8"; /* 指定编码，否则 window 下的 compass 会报错 */
+
 @import "variables";
 
 @import "func/types";

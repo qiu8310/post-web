@@ -20,8 +20,11 @@ var portscanner = require('portscanner');
 var tinylr = require('tiny-lr');
 var async = require('async');
 
+var isWin = require('os').platform() === 'win32';
 
 function findUnusedPort(port, hostname, callback) {
+  // window 不支持 '0.0.0.0' 的域名
+  if (isWin && hostname === '0.0.0.0') hostname = '127.0.0.1';
   // 最多扫描 30 个端口
   portscanner.findAPortNotInUse(port, 30, hostname, callback);
 }
