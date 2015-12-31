@@ -28,7 +28,6 @@ module.exports = require('./task-base').extend({
     icedOpts.print = true;
   },
 
-
   asyncCompileUnits: {
     js: function(data, cfg, cb) {
       cb(null, data);
@@ -54,7 +53,6 @@ module.exports = require('./task-base').extend({
       cb(null, require('typescript').transpile(data, this.taskOpts.typescript));
     }
   },
-
 
   getDistFile: function(file, ext) {
     var dist = this.options.webpack ? this.tmp : this.dist;
@@ -144,16 +142,32 @@ module.exports = require('./task-base').extend({
     var opts = this.options;
     var ruOpts = opts.rollup;
 
-    var initOpts = ruOpts.options || {};
-    var bundleOpts = ruOpts.bundle || {};
+    var initOpts = _.assign({}, ruOpts.options);
+    var bundleOpts = _.assign({}, ruOpts.bundle);
 
-    initOpts.entry = path.join(this.src, initOpts.entry || 'index.js');
-    bundleOpts.dest = path.join(this.dist, bundleOpts.dest || path.basename(initOpts.entry));
+    initOpts.entry = path.join(this.src, initOpts.entry || 'app.js');
+    if (initOpts.externals && !initOpts.external) initOpts.external = initOpts.externals;
 
+    var defaultDestBasename = path.basename(initOpts.entry).replace(/\.\w+$/, '.js');
+    if (!/\.js$/.test(defaultDestBasename)) defaultDestBasename += '.js';
+    bundleOpts.dest = path.join(this.dist, bundleOpts.dest || defaultDestBasename);
+
+    initOpts.plugins = initOpts.plugins || [];
+    initOpts.plugins.push(
+      require('rollup-plugin-npm')({main: true}),
+      require('rollup-plugin-commonjs')(),
+      require('../lib/rollup-resolveId').call(ylog, initOpts),
+      require('rollup-plugin-json')(),
+      require('rollup-plugin-babel')({
+        exclude: ['node_modules/**']
+      })
+    );
+
+    var self = this;
     require('rollup').rollup(initOpts).then(
       function (bundle) {
-        bundle.write(bundleOpts);
-        done();
+        var result = bundle.generate(bundleOpts);
+        require('../lib/rollup-post').call(self, result.code, initOpts, bundleOpts, done);
       },
       done
     );
@@ -175,18 +189,18 @@ module.exports = require('./task-base').extend({
         var bowerName = src.replace(opts.bowerDirectory, '').split('/')[1];
         var bowerData = this.h.safeReadJson(opts.bowerDirectory, bowerName, 'bower.json');
         if (Object.keys(bowerData.dependencies || {}).indexOf('angular') >= 0) {
-
           needNgAnnotate = true;
         }
       } else {
         if (!/^(?:lodash|kinetic|jquery)\./.test(path.basename(src))) {
           needNgAnnotate = true;
         }
+        if (/node_modules/.test(src)) needNgAnnotate = false;
       }
 
       if (needNgAnnotate) {
         this.ylog.info('&ng annotate& ^%s^', src);
-        content = ngAnnotate(content, {add:true, 'single_quotes': true}).src;
+        content = ngAnnotate(content, {add: true, 'single_quotes': true}).src;
       }
     }
 
@@ -222,9 +236,6 @@ module.exports = require('./task-base').extend({
 
       done(err);
     });
-
   }
-
-
 
 });

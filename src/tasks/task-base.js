@@ -423,7 +423,6 @@ module.exports = require('class-extend').extend({
     toDir = toDir || this.dist; // concat 到的目标文件夹
 
     var rtn = {};
-
     _.each(this.taskOpts.concat, function(files, target) {
       files = _.map(files, function(f) {
         f = self.appendExt(f);

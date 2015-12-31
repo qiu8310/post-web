@@ -24,7 +24,6 @@ module.exports = function(args, options, done) {
     stdio: 'pipe'
   }, options);
 
-
   if (options.autoAppendBat !== false && process.platform === 'win32') {
     args[0] = args[0] + '.bat';
   }
@@ -32,7 +31,6 @@ module.exports = function(args, options, done) {
   var cmd = args.join(' ');
   ylog.debug('executing ^%s^', cmd);
 
-  // var child = spawn(args.shift(), args, {
   var child = require('child_process').execFile(args.shift(), args, {
     env: options.env,
     cwd: options.cwd,

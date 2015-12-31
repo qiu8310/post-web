@@ -38,7 +38,7 @@ var options = {
   // 因为 templates, images, fonts 文件都比较常见，可能会出现在很多地方（比如项目的根目录就会有 md 文件）
   locate: {
     styles: ['css', 'sass', 'scss', 'less', 'styl'],
-    scripts: ['js', 'jsx', 'coffee', 'iced', 'ts'],
+    scripts: ['js', 'jsx', 'coffee', 'iced', 'ts', 'tsx'],
 
     templates: ['html', 'htm', 'jade', 'slim', 'haml', 'swig'],
 
@@ -57,7 +57,7 @@ var options = {
     compass: ['sass', 'scss'],
     babel: ['jsx', 'es6'],
     iced: ['iced'],
-    typescript: ['ts'],
+    typescript: ['ts', 'tsx'],
     image: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
     font: ['eot', 'ttf', 'woff', 'woff2', 'svg']
   },
@@ -118,7 +118,8 @@ var options = {
         warnings: false,
         mangle: true,
         compress: {
-          'drop_console': true
+          'drop_console': true,
+          warnings: false,
         }
       },
       babel: { ast: false, stage: 0 },
