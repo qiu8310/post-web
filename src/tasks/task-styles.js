@@ -27,7 +27,9 @@ function slash(str) {
 }
 
 module.exports = require('./task-base').extend({
-
+  init: function () {
+    this.initCss();
+  },
 
   initCompass: function() {
     var options = this.options,
@@ -94,10 +96,9 @@ module.exports = require('./task-base').extend({
     } else {
       browsers = ['last 10 versions', 'Chrome >= 24', 'Firefox >= 20'];
       compat.compatibility = [
-        'ie8',
-        '+properties.backgroundSizeMerging',
-        '+properties.iePrefixHack',
-        '+properties.ieSuffixHack'].join(',');
+        'ie7'
+        // 'ie8'
+      ].join(',');
     }
 
     taskOpts.cssnext = _.extend({ browsers: browsers }, taskOpts.cssnext);
