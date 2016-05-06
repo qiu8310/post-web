@@ -118,7 +118,7 @@ var options = {
         warnings: false,
         mangle: true,
         compress: {
-          'drop_console': true,
+          // 'drop_console': true,
           warnings: false,
         }
       },

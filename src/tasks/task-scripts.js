@@ -132,6 +132,15 @@ module.exports = require('./task-base').extend({
       }));
     }
 
+    wpOpts.module = {
+      loaders: [
+        {
+          test: /\.json$/,
+          loader: require.resolve('json5-loader')
+        }
+      ]
+    };
+
     webpack(wpOpts, function (err, out) {
       console.log('\n\nWebpack stats: \n\n%s\n', out.toString(stats));
       done(err);
