@@ -17,7 +17,6 @@ var ylog = require('ylog')('post:styles');
 var postcss = require('postcss'),
   CleanCss = require('clean-css'),
   cssgrace = require('cssgrace'),
-  cssnext = require('cssnext'),
   colormin = require('postcss-colormin');
 
 var isWin = require('os').platform() === 'win32';
@@ -101,13 +100,10 @@ module.exports = require('./task-base').extend({
       ].join(',');
     }
 
-    taskOpts.cssnext = _.extend({ browsers: browsers }, taskOpts.cssnext);
     taskOpts.cleancss = _.extend({
       // advanced: false,
       // relativeTo: path.dirname(cssFile)
     }, compat, taskOpts.cleancss);
-
-    ylog.info('cssnext options', taskOpts.cssnext);
 
     if (this.minify) {
       ylog.info('cleancss options', taskOpts.cleancss);
@@ -188,8 +184,7 @@ module.exports = require('./task-base').extend({
 
     // postcss 的 plugins
     var plugins = [
-      colormin,
-      cssnext(this.taskOpts.cssnext)
+      colormin
     ].concat(this.taskOpts.postcss.plugins);
 
     if (!options.mobile) {

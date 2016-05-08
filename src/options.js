@@ -107,7 +107,6 @@ var options = {
       cleancss: {
         keepSpecialComments: 0
       },
-      cssnext: {},
       concat: {
         // example: 后缀名可选，目录需要相对于对应资源的目录，而不是项目目录
         //styl: ['styl-1', 'styl-2', 'sub/styl']

@@ -8,8 +8,6 @@
 [![Coverage Status][coveralls-image]][coveralls-url]
 -->
 
-__不支持 node v6.x.x 版本__
-
 __在项目根目录上运行 `pweb`，自动分析文件结构，同时：__
 
 - 将 sass/stylus/less 编译成 css，同时支持 cssnext, autoprefixer 等，
