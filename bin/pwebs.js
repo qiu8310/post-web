@@ -34,7 +34,7 @@ ylog.info('watch directory ^%o^', dirs);
 var lr;
 
 require('../src/lib/watch')(dirs, {}, function(files) {
-  if (lr) { lr.trigger([].concat(files)); }
+  if (lr) { lr.trigger([].concat(files.map(function (a) { return a[1]; }))); }
 });
 
 require('../src/server/express-app')(
