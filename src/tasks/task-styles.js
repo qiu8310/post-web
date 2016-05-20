@@ -9,7 +9,8 @@
 var fs = require('fs-extra'),
   path = require('path'),
   _ = require('lodash'),
-  glob = require('glob');
+  glob = require('glob'),
+  autoprefixer = require('autoprefixer');
 
 //var CpsBoot = require('./../lib/compass-bootstrap');
 var ylog = require('ylog')('post:styles');
@@ -100,6 +101,7 @@ module.exports = require('./task-base').extend({
       ].join(',');
     }
 
+    taskOpts.autoprefixer = _.extend({browsers: browsers}, taskOpts.autoprefixer);
     taskOpts.cleancss = _.extend({
       // advanced: false,
       // relativeTo: path.dirname(cssFile)
@@ -184,7 +186,8 @@ module.exports = require('./task-base').extend({
 
     // postcss 的 plugins
     var plugins = [
-      colormin
+      colormin,
+      autoprefixer(this.taskOpts.autoprefixer)
     ].concat(this.taskOpts.postcss.plugins);
 
     if (!options.mobile) {
