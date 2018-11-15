@@ -289,7 +289,7 @@ module.exports = require('class-extend').extend({
                 filesCount++;
                 var msg;
                 var origSize = srcStats.size;
-                var diffSize = origSize - data.length;
+                var diffSize = origSize - data&&data.length?data.length:0;
 
                 totalSaved += diffSize;
                 if (diffSize < 10) {
